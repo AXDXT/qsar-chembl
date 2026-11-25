@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-command pipeline for Gate 1 and Gate 2 curation, split audit and leakage probe.
+# One-command pipeline through Gate 3 featurisation and fixed baselines.
 # Usage: ./run_all.sh [TARGET_ID]      (default CHEMBL284, the locked coursework target)
 # A target that already has data/raw/<TARGET_ID>/manifest.json is NOT re-pulled:
 # data/raw is immutable. Use `python -m src.retrieve <ID> --force` to replace a pull deliberately.
@@ -53,6 +53,9 @@ fi
 # Gate 3 featurisation: descriptors and Morgan bits from the standardised structures only,
 # cached with a manifest. Deterministic and byte-identical on a rerun; no model is fitted.
 "$PY" -m src.features "$TARGET"
+
+# Fixed mean and descriptor-only forest; reads the exact saved split assignments.
+"$PY" -m src.baselines "$TARGET"
 
 # Documentation guard: curation figures and sign-off tables must match this logged run.
 if [[ "$TARGET" == "CHEMBL284" ]]; then

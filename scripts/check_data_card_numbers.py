@@ -94,6 +94,38 @@ def signoff_table_checks(text: str, curation: dict, audit: dict, probe: dict) ->
             for label, values in expected.items()]
 
 
+def gate3_baseline_checks(text: str, report: dict) -> list[tuple[str, bool]]:
+    """Compare each baseline's displayed train/test scores, CIs and fixed choices to logs."""
+    rows = _table_rows(text)
+    expected = {}
+    for split in ("random", "scaffold"):
+        result = report["splits"][split]
+        for model, label in (("mean", "Training mean"), ("descriptor_rf", "Descriptor RF")):
+            score = result["models"][model]
+            cells = [f"{result['train_compounds']:,} / {result['test_compounds']:,}"]
+            cells += [f"{score['train'][metric]:.3f}" if score['train'][metric] is not None
+                      else "undefined" for metric in ("r2", "rmse", "mae")]
+            for metric in ("r2", "rmse", "mae"):
+                value = score["test"][metric]
+                ci = score["test_bootstrap"]["metrics"][metric]["ci95"]
+                cells.append(f"{value:.3f} [{ci[0]:.3f}, {ci[1]:.3f}]"
+                             if value is not None and ci else "undefined")
+            expected[f"{split} / {label}"] = cells
+    params = report["models"]["descriptor_rf"]["parameters"]
+    for label, key in (("Forest trees", "n_estimators"), ("Forest max_depth", "max_depth"),
+                       ("Forest max_features", "max_features"),
+                       ("Forest min_samples_split", "min_samples_split"),
+                       ("Forest min_samples_leaf", "min_samples_leaf"),
+                       ("Forest bootstrap", "bootstrap"), ("Estimator seed", "random_state"),
+                       ("Forest workers", "n_jobs"), ("Forest criterion", "criterion")):
+        expected[label] = [str(params[key])]
+    draws = {score["test_bootstrap"]["draws"] for split in report["splits"].values()
+             for score in split["models"].values()}
+    expected["Test bootstrap draws"] = [str(next(iter(draws)))] if len(draws) == 1 else []
+    return [(f"Gate 3 baseline table: {label}", rows.get(label) == [values])
+            for label, values in expected.items()]
+
+
 def main() -> int:
     d = json.loads(LOG.read_text())
     s = {x["step"]: x for x in d["steps"]}
@@ -211,6 +243,9 @@ def main() -> int:
     checks.extend(gate3_feature_checks(
         (ROOT / "DATA_CARD.md").read_text(),
         json.loads((FEATURES / "manifest.json").read_text())))
+    checks.extend(gate3_baseline_checks(
+        (ROOT / "DATA_CARD.md").read_text(),
+        json.loads((ROOT / "results/baselines/CHEMBL284/baselines.json").read_text())))
 
     for name, ok in checks:
         print(f"{'OK  ' if ok else 'FAIL'} {name}")

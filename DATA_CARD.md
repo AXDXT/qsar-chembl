@@ -8,7 +8,8 @@ recorded at the end with the fixed leakage probe. The executed walkthrough is
 `.venv/bin/python scripts/run_gate2_notebook.py`). The Gate 2 curation cascade, its
 judgement calls, the target variable and the measured replicate dispersion are recorded
 below under "Gate 2 curation cascade"; the split design and the fixed leakage probe follow
-it. Final human sign-off remains pending; no later-gate work is authorised by this review.
+it. Final human sign-off remains pending. Gate 3 baseline work is separately authorised
+in the build-room transcript; Gate 4 remains outside scope.
 
 This dataset is literature-reported bioactivity measurements. It does not establish, and this
 project does not claim, the efficacy, safety or suitability of any compound.
@@ -397,6 +398,86 @@ byte-identical; provenance travels in the input checksums instead.
   stereoisomers can receive identical features and different labels. 286 curated compounds
   share a connectivity skeleton with another compound, so this is a measured limitation
   rather than a hypothetical one. It is a ceiling on any model built from these features.
+
+## Gate 3 fixed baselines
+
+Command: `.venv/bin/python -m src.baselines CHEMBL284`, also run by `./run_all.sh`.
+Full parameters, versions, input checksums, predictions with explicit partition labels,
+point metrics and bootstrap diagnostics are in `results/baselines/CHEMBL284/`.
+Both models fit only training rows from the exact saved Gate 2 assignments. The
+evaluator never calls a split generator. A changed split audit invalidates the feature
+cache provenance rather than silently substituting a new evaluation boundary.
+
+| Split / baseline | Train / test n | Train R² | Train RMSE | Train MAE | Test R² (95% interval) | Test RMSE (95% interval) | Test MAE (95% interval) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| random / Training mean | 3,172 / 793 | 0.000 | 1.316 | 1.020 | -0.003 [-0.023, -0.000] | 1.381 [1.284, 1.474] | 1.085 [1.008, 1.166] |
+| random / Descriptor RF | 3,172 / 793 | 0.896 | 0.425 | 0.302 | 0.524 [0.455, 0.584] | 0.951 [0.877, 1.025] | 0.708 [0.659, 0.760] |
+| scaffold / Training mean | 3,163 / 802 | 0.000 | 1.295 | 1.002 | -0.016 [-0.102, -0.000] | 1.458 [1.270, 1.657] | 1.149 [1.002, 1.315] |
+| scaffold / Descriptor RF | 3,163 / 802 | 0.890 | 0.429 | 0.304 | 0.417 [0.310, 0.500] | 1.104 [1.003, 1.207] | 0.863 [0.776, 0.957] |
+
+RMSE and MAE are pIC50 log units; R² is dimensionless. Test intervals use the
+same whole-test-scaffold percentile bootstrap as Gate 2, with the fixed choices below.
+Both models receive the same bootstrap draws within each split. Predictions, training
+sets and splits stay fixed; these intervals exclude uncertainty from retraining or
+alternative allocations. Cross-core similarity may couple groups. Degenerate R² draws
+are excluded and counted in the JSON. Intervals are descriptive and overlap; they do
+not constitute a significance test of the split contrast. Training scores are
+resubstitution diagnostics, so no generalisation interval is attached to them.
+
+| Baseline choice | Logged value |
+|---|---:|
+| Forest trees | 200 |
+| Forest max_depth | None |
+| Forest max_features | 1.0 |
+| Forest min_samples_split | 2 |
+| Forest min_samples_leaf | 1 |
+| Forest bootstrap | True |
+| Forest criterion | squared_error |
+| Estimator seed | 42 |
+| Forest workers | 1 |
+| Test bootstrap draws | 2000 |
+
+**Why these choices:** `DummyRegressor(strategy="mean")` ignores chemistry and predicts
+the training mean, the appropriate trivial floor for squared error. Near-zero, slightly
+negative test R² is expected because the held-out mean differs from the training mean.
+The forest is a conventional, fully grown, bagged regression baseline using all descriptor
+columns at each node. The fixed tree count reduces Monte Carlo variation; unit minimum
+leaf size exposes the train/test gap. A single worker fixes accumulation order for
+byte reproducibility. None of these choices was searched or selected by a metric.
+Every estimator parameter, including library defaults not displayed above, is logged
+by `get_params()` with the scikit-learn version in `baselines.json`.
+
+**Transforms and weighting:** no scaling, imputation, variance filtering or feature
+selection. The descriptors are stateless per molecule; non-finite values abort.
+The only fitted objects are the estimators, fitted on training rows only. Each curated
+compound has equal weight, regardless of its report count. Fingerprints are cached
+but do not enter either Gate 3 baseline.
+
+**What this establishes before fingerprints:** the descriptor forest beats the mean
+under both splits, while its much smaller training errors expose overfitting. Its
+scaffold test error is plainly higher than its random test error. Gate 2 already
+measured shared training cores and more close neighbours under random allocation;
+scaffold holdout removes shared exact cores but retains close neighbours. The score
+contrast is consistent with easier interpolation under random allocation, while
+changed chemistry and target distributions also contribute. It is not an isolated
+causal leakage penalty. Gate 4 must justify added fingerprint complexity against this
+descriptor-only floor under the same evaluation boundaries, not merely beat the mean.
+
+The mean's test RMSE under each split exceeds all three Gate 2 repeat-dispersion
+statistics. The descriptor forest's random test RMSE lies above the all-repeat and
+low-spread-subset figures but below the differing-repeat sensitivity figure; its
+scaffold test RMSE exceeds all three. These are descriptive comparisons of point
+estimates with different populations and targets, not validated bounds or pass/fail
+criteria. The repeat statistics describe individual reports; these predictions
+target compound medians. Aadit has not chosen any Gate 4 noise reference.
+
+The fingerprint nearest-neighbour leakage probe stays separate: it demonstrates
+structural reuse under the evaluation boundaries. These baselines supersede it as
+the Gate 4 comparison floor, while retaining its Gate 2 diagnostic role. They do not
+establish efficacy, safety or suitability of any compound.
+
+**Needs decision:** Aadit's choice of repeat-dispersion reference for Gate 4 and the
+licence for this repository's own code both remain open. Neither is resolved here.
 
 **Needs decision before sign-off:** the existing 0.310-log-unit noise figure
 conditions on replicate groups with 0.01 <= spread <=1 log unit. It describes that

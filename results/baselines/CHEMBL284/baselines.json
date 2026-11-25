@@ -1,0 +1,262 @@
+{
+  "target_chembl_id": "CHEMBL284",
+  "command": ".venv/bin/python -m src.baselines CHEMBL284",
+  "purpose": "Gate 3 baseline floor only; fixed, untuned hyperparameters; no Gate 4 model",
+  "seed": 42,
+  "sklearn_version": "1.9.1",
+  "numpy_version": "2.5.5",
+  "rdkit_version": "2026.09.1",
+  "source": {
+    "raw_manifest_sha256": "b9dd14afd98254d9bd9efcc17b0183d513920116c10803671c752ff2b226ab15",
+    "curated_compounds_sha256": "38a146dfc20899f410bbcf5bbb889fceb9a5e9b5c163dcffe2b1d1bd99af77b6",
+    "split_audit_sha256": "76028f45ba97ce47c6634b607200684c51f2478113fbb6448ac880686ff1dec2",
+    "feature_manifest_sha256": "50086609b246eba2d269c401b46bb8d6b9a3f273e4dd5e6a3fdce14065bde8bf",
+    "assignment_sha256": {
+      "random": "9e032efd6d85987ce7c75b4ee6ce650471fa3b986fca7a4bcaade865e37d38bb",
+      "scaffold": "b8320a94e9661c4fa8b0c50d36bf2bde4fa8c1aab768164d61ec6ab9c217cbbb"
+    }
+  },
+  "features": [
+    "MolWt",
+    "HeavyAtomCount",
+    "MolLogP",
+    "MolMR",
+    "TPSA",
+    "NumLipinskiHBD",
+    "NumLipinskiHBA",
+    "NumRotatableBonds",
+    "RingCount",
+    "NumAromaticRings",
+    "FractionCSP3",
+    "NumHeteroatoms"
+  ],
+  "preprocessing": "Stateless per-molecule cached descriptors only. No scaling, imputation, variance filtering or feature selection. Non-finite values abort. Both estimators, including the mean, fit training rows only. Equal compound weights; no weighting by repeated report count.",
+  "models": {
+    "mean": {
+      "class": "DummyRegressor",
+      "parameters": {
+        "constant": null,
+        "quantile": null,
+        "strategy": "mean"
+      }
+    },
+    "descriptor_rf": {
+      "class": "RandomForestRegressor",
+      "parameters": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "criterion": "squared_error",
+        "max_depth": null,
+        "max_features": 1.0,
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 200,
+        "n_jobs": 1,
+        "oob_score": false,
+        "random_state": 42,
+        "verbose": 0,
+        "warm_start": false
+      }
+    }
+  },
+  "hyperparameter_rationale": "Declared before the first run; no search. The mean ignores chemistry and is the trivial floor. The forest uses 200 bootstrap trees to reduce Monte Carlo variation, all descriptors at each node, fully grown trees and unit minimum leaf size as a conventional untuned regression baseline. Its flexibility makes train/test gaps visible. One worker and seed 42 fix the execution. These are engineering defaults, not evidence of optimality.",
+  "uncertainty": "95% percentile intervals from 2000 whole-test-scaffold bootstrap draws, compound-weighted metrics, seed 42; same draws for both models. Fixed fitted models, training sets and splits: no retraining or split-seed uncertainty. Cross-core similarity can still couple groups. Intervals are descriptive, not a significance test. Degenerate R2 draws are excluded and counted in the log.",
+  "training_uncertainty": "Not estimated: train scores are resubstitution diagnostics of the fitted estimator, not an estimate of generalisation; test intervals are reported.",
+  "splits": {
+    "random": {
+      "train_compounds": 3172,
+      "test_compounds": 793,
+      "training_mean_pIC50": 7.046482715810933,
+      "models": {
+        "mean": {
+          "train": {
+            "rmse": 1.3157919888287333,
+            "mae": 1.0204839740527691,
+            "r2": 0.0
+          },
+          "test": {
+            "rmse": 1.3806283230807397,
+            "mae": 1.0853887018197252,
+            "r2": -0.003435746972130005
+          },
+          "test_bootstrap": {
+            "scaffold_groups": 472,
+            "draws": 2000,
+            "seed": 42,
+            "metrics": {
+              "rmse": {
+                "ci95": [
+                  1.2840457569573298,
+                  1.4739066858773333
+                ],
+                "valid_draws": 2000
+              },
+              "mae": {
+                "ci95": [
+                  1.0083907384060917,
+                  1.1663365686469893
+                ],
+                "valid_draws": 2000
+              },
+              "r2": {
+                "ci95": [
+                  -0.023031256323746425,
+                  -7.535042203282722e-06
+                ],
+                "valid_draws": 2000
+              }
+            }
+          }
+        },
+        "descriptor_rf": {
+          "train": {
+            "rmse": 0.42453229078704563,
+            "mae": 0.30176452678939647,
+            "r2": 0.8959008981373849
+          },
+          "test": {
+            "rmse": 0.9509145142867195,
+            "mae": 0.7076556680845361,
+            "r2": 0.5239868350208594
+          },
+          "test_bootstrap": {
+            "scaffold_groups": 472,
+            "draws": 2000,
+            "seed": 42,
+            "metrics": {
+              "rmse": {
+                "ci95": [
+                  0.8765973698159968,
+                  1.0246258464218465
+                ],
+                "valid_draws": 2000
+              },
+              "mae": {
+                "ci95": [
+                  0.6586325773263777,
+                  0.7596953290950776
+                ],
+                "valid_draws": 2000
+              },
+              "r2": {
+                "ci95": [
+                  0.4547084932254757,
+                  0.5842986920933639
+                ],
+                "valid_draws": 2000
+              }
+            }
+          }
+        }
+      }
+    },
+    "scaffold": {
+      "train_compounds": 3163,
+      "test_compounds": 802,
+      "training_mean_pIC50": 7.06746497159518,
+      "models": {
+        "mean": {
+          "train": {
+            "rmse": 1.2949102435526558,
+            "mae": 1.001807866004244,
+            "r2": 0.0
+          },
+          "test": {
+            "rmse": 1.4576373346840097,
+            "mae": 1.1488463033149572,
+            "r2": -0.01612359652421458
+          },
+          "test_bootstrap": {
+            "scaffold_groups": 341,
+            "draws": 2000,
+            "seed": 42,
+            "metrics": {
+              "rmse": {
+                "ci95": [
+                  1.2704787089343565,
+                  1.6569445051499385
+                ],
+                "valid_draws": 2000
+              },
+              "mae": {
+                "ci95": [
+                  1.0018785915640795,
+                  1.3147361836768185
+                ],
+                "valid_draws": 2000
+              },
+              "r2": {
+                "ci95": [
+                  -0.10152144867179251,
+                  -4.958638000112735e-05
+                ],
+                "valid_draws": 2000
+              }
+            }
+          }
+        },
+        "descriptor_rf": {
+          "train": {
+            "rmse": 0.4286622393931244,
+            "mae": 0.30361553936943114,
+            "r2": 0.890414996952027
+          },
+          "test": {
+            "rmse": 1.1044737381958136,
+            "mae": 0.8625822826549778,
+            "r2": 0.4166108368924768
+          },
+          "test_bootstrap": {
+            "scaffold_groups": 341,
+            "draws": 2000,
+            "seed": 42,
+            "metrics": {
+              "rmse": {
+                "ci95": [
+                  1.0033380251240271,
+                  1.207350916417236
+                ],
+                "valid_draws": 2000
+              },
+              "mae": {
+                "ci95": [
+                  0.7756496152736808,
+                  0.957375510085817
+                ],
+                "valid_draws": 2000
+              },
+              "r2": {
+                "ci95": [
+                  0.30986671104478025,
+                  0.49958708313459044
+                ],
+                "valid_draws": 2000
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "disclaimer": "Literature/patent-reported IC50; no efficacy, safety or suitability claim.",
+  "inputs_verified_before_and_after": true,
+  "files": {
+    "random_mean_predictions.csv": {
+      "sha256": "5e973e12e446ecd700ec9674169373eede2f3551d2a3b0b2ff5431a485b3bb3b"
+    },
+    "random_descriptor_rf_predictions.csv": {
+      "sha256": "f2ace8da4a2510bd408e6c3e3c45849509c4ab77ff3e53c65a2f1b358bded9bf"
+    },
+    "scaffold_mean_predictions.csv": {
+      "sha256": "4644358374d0a65f718aa3281d2bcb26edc9b552b5f7555c2da9030816240410"
+    },
+    "scaffold_descriptor_rf_predictions.csv": {
+      "sha256": "77adb1aff878cd7d00685e2210ba14e21b14058c27b5d9513bd721b06f59b285"
+    }
+  }
+}

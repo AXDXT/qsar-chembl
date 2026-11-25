@@ -1,13 +1,16 @@
 # Project 19 - QSAR Bioactivity Modelling (ChEMBL)
 
 Second-year B.Tech CS (AI and ML) coursework, dataset-only. Status: **Gate 2 awaiting human
-sign-off; Gate 3 featurisation in place, baselines not yet implemented**. Human DPP4
+sign-off; Gate 3 fixed baselines recorded, review pending**. Human DPP4
 (CHEMBL284) is locked by Aadit. Offline curation, the structural split audit and the fixed
 leakage probe are implemented, with an executable visual notebook. Aadit's noise-reference
 decision and final approval remain; see [the Gate 2 handoff](GATE2_SIGNOFF.md).
-Gate 3 so far provides a deterministic, checksummed descriptor and Morgan fingerprint cache
-built only from the standardised structures. **No baseline and no Gate 4 model is fitted yet**,
-so the repo reports no predictive performance beyond the Gate 2 leakage probe.
+Gate 3 provides a deterministic, checksummed descriptor and Morgan fingerprint cache
+built only from the standardised structures, plus training-mean and descriptor-only forest
+baselines under both saved splits. The full train/test table and uncertainty are in
+[DATA_CARD.md](DATA_CARD.md#gate-3-fixed-baselines) and
+[`results/baselines/CHEMBL284/baselines.md`](results/baselines/CHEMBL284/baselines.md).
+No Gate 4 model, hyperparameter search or combined feature model has been fitted.
 
 This project models literature-reported bioactivity measurements. Nothing in it claims or
 implies efficacy, safety or suitability of any compound.
@@ -25,6 +28,7 @@ implies efficacy, safety or suitability of any compound.
 | `src/splits.py` | reproducible compound random/scaffold splits and exhaustive structural leakage audit; no model fitting |
 | `src/leakage_probe.py` | one fixed Tanimoto nearest-neighbour leakage probe, scaffold-group bootstrap uncertainty; not a Gate 3 baseline |
 | `src/features.py` | Gate 3 featurisation: 12 declared RDKit descriptors and radius-2 Morgan bits from the standardised structures, cached with a manifest; no model fitted |
+| `src/baselines.py` | fixed training-mean and descriptor-only Random Forest baselines; exact saved splits, train/test metrics and scaffold-group bootstrap test intervals |
 | `DATA_CARD.md` | provenance, licence, measured composition and known biases |
 | `data/raw/` | **immutable**: unmodified API responses only, each with `manifest.json` (sha256 per file) |
 | `data/curated/` | derived data (Gate 2 onwards), always regenerated from `data/raw/` by code |
@@ -32,14 +36,14 @@ implies efficacy, safety or suitability of any compound.
 | `results/` | logged outputs: counts, profiles, figures |
 | `notebooks/gate2_dpp4_curation_and_leakage.ipynb` | executed offline visual walkthrough; reruns the production modules from frozen raw data in temporary output directories |
 | `scripts/run_gate2_notebook.py` | executes all notebook cells without a server/kernel listener and saves verified outputs |
-| `scripts/check_data_card_numbers.py` | checks documented curation figures and compares the `GATE2_SIGNOFF.md` and Gate 3 featurisation tables directly with logged results |
+| `scripts/check_data_card_numbers.py` | checks documented curation figures and compares the `GATE2_SIGNOFF.md`, Gate 3 feature and baseline tables directly with logged results |
 | `tests/` | offline by default; `-m live` runs the tests that hit the ChEMBL API |
 
 ## Setup and run
 
 ```bash
 .venv/bin/pip install -r requirements.txt   # Python 3.13; versions pinned from the working .venv
-./run_all.sh                 # compile, offline tests, reuse frozen DPP4, profile/curate/split/probe/featurise
+./run_all.sh                 # compile, offline tests, frozen DPP4 -> curation/splits/probe/features/baselines
 ./run_all.sh <TARGET_ID>     # same for another ChEMBL target id
 .venv/bin/python -m pytest -q -m live       # tests that need the live API
 .venv/bin/python -m src.candidates          # live measured counts for all four candidates
@@ -49,6 +53,7 @@ implies efficacy, safety or suitability of any compound.
 .venv/bin/python -m src.splits CHEMBL284     # offline splits from checksum-verified curated compounds
 .venv/bin/python -m src.leakage_probe CHEMBL284  # fixed probe on both saved splits, no tuning
 .venv/bin/python -m src.features CHEMBL284   # Gate 3 feature cache from the standardised structures
+.venv/bin/python -m src.baselines CHEMBL284  # fixed mean + descriptor RF on both exact saved splits
 .venv/bin/python scripts/run_gate2_notebook.py  # execute/save the visual walkthrough offline
 .venv/bin/python scripts/check_data_card_numbers.py  # curation figures and sign-off tables vs logs
 ```
