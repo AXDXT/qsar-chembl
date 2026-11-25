@@ -1,0 +1,88 @@
+{
+  "target_chembl_id": "CHEMBL284",
+  "chembl_db_version": "ChEMBL_37",
+  "curated_utc": "2026-11-25T10:41:19+00:00",
+  "command": ".venv/bin/python -m src.curate CHEMBL284",
+  "seed": 42,
+  "python": "3.13.7",
+  "source": {
+    "raw_dir": "data/raw/CHEMBL284",
+    "raw_manifest_sha256": "b9dd14afd98254d9bd9efcc17b0183d513920116c10803671c752ff2b226ab15",
+    "raw_files": {
+      "activities.jsonl.gz": {
+        "sha256": "e9b45057e83def56e891acf1cc3da20ae062a2ee0a63e2103aadc1f5147a2a5a",
+        "format": "gzip JSON lines, one API record per line"
+      },
+      "target.json": {
+        "sha256": "16c59843a82652d6ebe71fe7b2070140b9b03c377c0e525c39945a6198a2443b",
+        "format": "JSON, API target record"
+      }
+    },
+    "raw_verified_before_and_after": true
+  },
+  "cascade": [
+    {
+      "step": "1_binding_assay",
+      "rule": "assay_type == 'B'",
+      "records_in": 8397,
+      "records_out": 8174,
+      "records_removed": 223
+    },
+    {
+      "step": "2_single_activity_type",
+      "rule": "standard_type == 'IC50'",
+      "records_in": 8174,
+      "records_out": 5781,
+      "records_removed": 2393
+    },
+    {
+      "step": "3_single_target_organism",
+      "rule": "target_organism == 'Homo sapiens' and str(target_tax_id) == '9606'",
+      "records_in": 5781,
+      "records_out": 5781,
+      "records_removed": 0
+    },
+    {
+      "step": "4_units_harmonised_to_nM",
+      "rule": "standard_units in ['M', 'fM', 'mM', 'nM', 'pM', 'uM', 'µM', 'μM'] and standard_value is a finite number > 0",
+      "records_in": 5781,
+      "records_out": 5650,
+      "records_removed": 131
+    },
+    {
+      "step": "5_censored_removed",
+      "rule": "standard_relation == '=' exactly",
+      "records_in": 5650,
+      "records_out": 4859,
+      "records_removed": 791
+    },
+    {
+      "step": "6_structure_standardised",
+      "rule": "RDKit sanitise -> largest fragment -> neutralise -> canonical SMILES -> InChIKey",
+      "records_in": 4859,
+      "records_out": 4855,
+      "records_removed": 4
+    },
+    {
+      "step": "7_duplicates_resolved",
+      "rule": "median pIC50 per standardised InChIKey; spread > 1.0 log unit flagged",
+      "records_in": 4855,
+      "records_out": 3965,
+      "records_removed": 890
+    }
+  ],
+  "curated_records": 4855,
+  "curated_compounds": 3965,
+  "target_variable": "pIC50 = -log10(IC50 in mol/L), median over replicates per InChIKey",
+  "compound_identity": "standardised InChIKey (full, after largest fragment and neutralisation); ChEMBL molecule and parent IDs are kept as audit columns, not as the identity",
+  "files": {
+    "compounds.csv": {
+      "sha256": "38a146dfc20899f410bbcf5bbb889fceb9a5e9b5c163dcffe2b1d1bd99af77b6"
+    },
+    "records_curated.csv": {
+      "sha256": "ed8b9ed5fdced7b06a9c6a11cee473520bf0c5b3f5e52e239a31e421f89dcc50"
+    }
+  },
+  "licence": "CC BY-SA 3.0, derived from ChEMBL. ChEMBL data is from http://www.ebi.ac.uk/chembl - the version of ChEMBL is chembl_37.",
+  "disclaimer": "Literature- and patent-reported bioactivity measurements. No claim of efficacy, safety or suitability of any compound."
+}

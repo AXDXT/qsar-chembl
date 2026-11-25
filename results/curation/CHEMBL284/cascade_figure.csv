@@ -1,0 +1,9 @@
+order,label,records,removed,unit
+0,raw pull,8397,0,records
+1,binding assay,8174,223,records
+2,single activity type,5781,2393,records
+3,single target organism,5781,0,records
+4,units harmonised to nM,5650,131,records
+5,censored removed,4859,791,records
+6,structure standardised,4855,4,records
+7,duplicates resolved,3965,890,compounds

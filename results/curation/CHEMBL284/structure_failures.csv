@@ -1,0 +1,5 @@
+activity_id,molecule_chembl_id,canonical_smiles_in,failure
+15010453,CHEMBL3310989,,missing_smiles: no canonical_smiles in the API record
+17610921,CHEMBL3648425,,missing_smiles: no canonical_smiles in the API record
+17610922,CHEMBL4115755,,missing_smiles: no canonical_smiles in the API record
+17610923,CHEMBL3648424,,missing_smiles: no canonical_smiles in the API record

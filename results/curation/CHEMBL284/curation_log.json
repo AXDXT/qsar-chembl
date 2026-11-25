@@ -1,0 +1,304 @@
+{
+  "steps": [
+    {
+      "step": "1_binding_assay",
+      "rule": "assay_type == 'B'",
+      "records_in": 8397,
+      "records_out": 8174,
+      "records_removed": 223,
+      "removed_breakdown": {
+        "assay_type='A'": 177,
+        "assay_type='F'": 46
+      }
+    },
+    {
+      "step": "2_single_activity_type",
+      "rule": "standard_type == 'IC50'",
+      "records_in": 8174,
+      "records_out": 5781,
+      "records_removed": 2393,
+      "removed_breakdown": {
+        "standard_type='% Ctrl'": 1,
+        "standard_type='% Inhibition of Control Values'": 1,
+        "standard_type='Activity'": 48,
+        "standard_type='EC50'": 4,
+        "standard_type='IC5'": 2,
+        "standard_type='INH'": 1,
+        "standard_type='Inhibition'": 723,
+        "standard_type='K inact'": 2,
+        "standard_type='K obs / 1'": 8,
+        "standard_type='K'": 62,
+        "standard_type='Ka'": 1,
+        "standard_type='Kapp'": 1,
+        "standard_type='Kd'": 26,
+        "standard_type='Kdiss'": 1,
+        "standard_type='Ki'": 709,
+        "standard_type='Km'": 23,
+        "standard_type='Ratio IC50'": 12,
+        "standard_type='Ratio Ki'": 5,
+        "standard_type='Selectivity index'": 68,
+        "standard_type='T1/2'": 14,
+        "standard_type='TIME'": 20,
+        "standard_type='TdeltaS'": 1,
+        "standard_type='Vmax'": 4,
+        "standard_type='Vmax/Km'": 4,
+        "standard_type='deltaG'": 1,
+        "standard_type='deltaH'": 1,
+        "standard_type='k_off'": 325,
+        "standard_type='kon'": 325
+      },
+      "removed_activity_types": 28
+    },
+    {
+      "step": "3_single_target_organism",
+      "rule": "target_organism == 'Homo sapiens' and str(target_tax_id) == '9606'",
+      "records_in": 5781,
+      "records_out": 5781,
+      "records_removed": 0,
+      "removed_breakdown": {},
+      "note_": "The rule is the TARGET organism. The assay expression host is absent from every activity record in this pull, so it is not inferred."
+    },
+    {
+      "step": "4_units_harmonised_to_nM",
+      "rule": "standard_units in ['M', 'fM', 'mM', 'nM', 'pM', 'uM', 'µM', 'μM'] and standard_value is a finite number > 0",
+      "records_in": 5781,
+      "records_out": 5650,
+      "records_removed": 131,
+      "removed_breakdown": {
+        "unit_not_convertible=<missing>": 78,
+        "unit_not_convertible=ug.mL-1": 48,
+        "value_not_a_number": 5
+      },
+      "units_accepted": {
+        "nM": 5650
+      },
+      "refused_rows": 131,
+      "note_": "Every refusal is itemised in units_refused.csv. Mass concentrations are refused because the molecular weight of the tested material (possibly a salt) is not known here; converting them would mix two measurement bases."
+    },
+    {
+      "step": "5_censored_removed",
+      "rule": "standard_relation == '=' exactly",
+      "records_in": 5650,
+      "records_out": 4859,
+      "records_removed": 791,
+      "removed_breakdown": {
+        "relation='<'": 54,
+        "relation='>'": 732,
+        "relation='>='": 1,
+        "relation='>>'": 4
+      },
+      "censored_rows_removed": 791,
+      "missing_relation_rows_removed": 0,
+      "note_": "Censored means the measurement is a bound, not a value: a '>' row only says the IC50 exceeds the highest concentration tested. Keeping them as if they were values would put invented numbers into the target variable. Rows with no relation at all are removed by the same rule but counted separately."
+    },
+    {
+      "step": "6_structure_standardised",
+      "rule": "RDKit sanitise -> largest fragment -> neutralise -> canonical SMILES -> InChIKey",
+      "records_in": 4859,
+      "records_out": 4855,
+      "records_removed": 4,
+      "removed_breakdown": {
+        "structure_missing_smiles": 4
+      },
+      "failed_rows": 4,
+      "salt_or_mixture_rows": 855,
+      "charged_rows_neutralised": 2,
+      "note_": "Every failure is itemised in structure_failures.csv; no molecule is dropped silently."
+    },
+    {
+      "step": "7_duplicates_resolved",
+      "rule": "median pIC50 per standardised InChIKey; spread > 1.0 log unit flagged",
+      "records_in": 4855,
+      "records_out": 3965,
+      "records_removed": 890,
+      "removed_breakdown": {
+        "rows_collapsed_into_a_median": 890
+      },
+      "compounds_with_replicates": 476,
+      "compounds_flagged_spread_over_1_log": 108,
+      "note_": "The output unit changes here: rows become compounds. The median is used rather than the mean because replicate IC50 sets in this pull have a long tail of cross-assay disagreement, which a mean would follow."
+    }
+  ],
+  "input_records": 8397,
+  "target_chembl_id": "CHEMBL284",
+  "chembl_db_version": "ChEMBL_37",
+  "raw_retrieval_finished_utc": "2026-11-25T06:46:36+00:00",
+  "curated_utc": "2026-11-25T10:41:19+00:00",
+  "command": ".venv/bin/python -m src.curate CHEMBL284",
+  "seed": 42,
+  "source_raw_files": {
+    "activities.jsonl.gz": {
+      "sha256": "e9b45057e83def56e891acf1cc3da20ae062a2ee0a63e2103aadc1f5147a2a5a",
+      "format": "gzip JSON lines, one API record per line"
+    },
+    "target.json": {
+      "sha256": "16c59843a82652d6ebe71fe7b2070140b9b03c377c0e525c39945a6198a2443b",
+      "format": "JSON, API target record"
+    }
+  },
+  "target_variable": {
+    "n_compounds": 3965,
+    "min": -0.04139268515822508,
+    "p05": 4.42021640338319,
+    "q1": 6.309803919971486,
+    "median": 7.174360993000928,
+    "q3": 7.958607314841775,
+    "p95": 8.950781977329818,
+    "max": 10.096910013008056,
+    "mean": 7.030325274907263,
+    "stdev": 1.329081716631437,
+    "skew_mean_minus_median": -0.1440357180936651,
+    "below_4": 108,
+    "above_9": 156,
+    "below_2_implausible": 2,
+    "above_10": 3,
+    "most_common_one_dp_bins": {
+      "7.2": 154,
+      "7.0": 150,
+      "7.6": 148,
+      "7.7": 144,
+      "7.1": 143,
+      "7.3": 140,
+      "6.9": 122,
+      "7.5": 120,
+      "7.9": 115,
+      "6.6": 114
+    },
+    "exact_integer_pIC50_values": {
+      "3.0": 1,
+      "4.0": 1,
+      "5.0": 3,
+      "6.0": 4,
+      "7.0": 12,
+      "8.0": 33,
+      "9.0": 23,
+      "10.0": 3
+    },
+    "pathology_checks": {
+      "round_number_pile_ups": {
+        "finding": "No spike at a reporting-convention concentration. The densest 0.1-log bins are all in the 6.6-7.9 interior of the distribution, which is where the mass of the data is; there is no pile-up at pIC50 5.0 (10 uM) or 4.0 (100 uM).",
+        "exact_integer_values": "80 of 3965 compounds sit on an exact integer pIC50, concentrated at 8.0 and 9.0. That is a rounding fingerprint (10 nM, 1 nM reported as round numbers), small but real."
+      },
+      "implausible_extremes": {
+        "finding": "min -0.041 (IC50 ~ 1.1 M), max 10.097. A pIC50 below about 2 means an IC50 above 10 mM, which is past the solubility of most of these compounds and is better read as 'inactive at the top concentration tested' than as a measurement.",
+        "compounds_below_pIC50_2": 2,
+        "compounds_below_pIC50_4": 108,
+        "decision": "These are kept in the curated set and flagged here rather than trimmed, because an activity threshold is a modelling choice and belongs to a later gate, not to curation. Any later gate that trims them must say so and re-report the count."
+      },
+      "assay_ceiling": "A hard ceiling would appear as a cluster of identical values at the top concentration tested. Censored '>' rows, which are where such a ceiling normally hides, were removed at step 5 and counted there, so the ceiling has been taken out of the target variable rather than flattened into it."
+    }
+  },
+  "replicate_noise": {
+    "definition": "Dispersion between repeated IC50 measurements of the same standardised compound, in pIC50 log units, directly comparable with a model RMSE.",
+    "replicated_compounds": 476,
+    "replicate_measurements": 1366,
+    "degrees_of_freedom": 890,
+    "spread_histogram_log_units": {
+      "0-0.01": 222,
+      "0.01-0.3": 64,
+      "0.3-1": 79,
+      "1-2": 40,
+      "2-3": 15,
+      ">3": 56
+    },
+    "groups_numerically_identical": 222,
+    "groups_genuinely_differing": 254,
+    "pooled_within_compound_sd_all_groups": 0.8278402046109885,
+    "pooled_within_compound_sd_differing_groups": 1.0107743616189764,
+    "pooled_within_compound_sd_differing_under_1_log": 0.30984123494360544,
+    "degrees_of_freedom_differing_groups": 597,
+    "degrees_of_freedom_differing_under_1_log": 208,
+    "rms_deviation_from_own_median": 0.6970068246510573,
+    "median_absolute_deviation_from_own_median": 0.0072738405961616515,
+    "spread_median": 0.0593904617773755,
+    "spread_mean": 0.7178925127975282,
+    "spread_p90": 3.0,
+    "spread_max": 8.32221929473392,
+    "compounds_flagged_spread_over_1_log": 108,
+    "noise_floor": {
+      "recommended_for_gate4": 0.30984123494360544,
+      "recommended_basis": "pooled_within_compound_sd_differing_under_1_log: the pooled SD over replicate groups that actually differ (identical re-reports excluded) and that agree to within one log unit. This is the dispersion of genuinely repeated measurement of the same chemistry, and is the number a model RMSE should be compared with.",
+      "ceiling_including_irreconcilable_groups": 1.0107743616189764,
+      "ceiling_basis": "pooled_within_compound_sd_differing_groups: the same quantity over every differing group, including the ones whose replicates disagree by several log units. Those are contradictory measurements rather than noise around a value, so this is a ceiling on how generous the floor could honestly be made.",
+      "all_groups_figure_and_why_it_is_not_used": {
+        "value": 0.8278402046109885,
+        "reason": "The pooled SD over all replicate groups mixes two populations: identical re-reports contribute zero variance and deflate it, while irreconcilable groups inflate it. It is reported for completeness and is not a defensible noise floor in either direction."
+      }
+    },
+    "caveats": [
+      "These are repeated literature and patent reports, not a designed replicate experiment: they mix assay protocols, so none of these figures is pure assay noise.",
+      "The spread distribution is bimodal: most groups are identical re-reports of one number, and a long tail disagrees by several log units. The mean spread (and the pooled SD over all groups) sits between the two modes and describes neither; the histogram above is the honest summary.",
+      "Only replicated compounds contribute. 3489 of 3965 curated compounds are measured once, so the floor is measured on 12.0% of the curated set.",
+      "A model RMSE below the recommended floor on a held-out set would indicate leakage or memorisation, not accuracy."
+    ]
+  },
+  "identity_decisions": {
+    "compound_identity_key": "standardised InChIKey (full, after largest fragment and neutralisation); ChEMBL molecule and parent IDs are kept as audit columns, not as the identity",
+    "why": "ChEMBL molecule IDs separate a salt from its parent, so keying on them would enter the same chemistry twice and could place the two copies on opposite sides of a split. The standardised InChIKey is the chemistry-level identity and merges them by construction.",
+    "rows_with_parent_different_from_molecule_id": 855,
+    "distinct_molecule_ids_in_curated_records": 4000,
+    "distinct_parent_ids_in_curated_records": 3965,
+    "compounds_merging_more_than_one_molecule_id": 32,
+    "molecule_ids_absorbed_by_merging": 35,
+    "stereoisomer_or_tautomer_pairs_sharing_a_skeleton": 286,
+    "distinct_inchikey_skeletons": 3679,
+    "busiest_compound": {
+      "inchikey": "MFFMDFFZMYYVKS-SECBINFHSA-N",
+      "molecule_chembl_ids": "CHEMBL1201174;CHEMBL1422;CHEMBL393336;CHEMBL539077",
+      "n_records": 71,
+      "n_assays": 70,
+      "n_documents": 62,
+      "pIC50_median": 7.7447274948966935,
+      "pIC50_spread": 4.139661993429007,
+      "decision": "kept as ONE compound with the median of its replicates. Repeated reporting of a reference compound is not repeated chemistry; leaving its rows separate would weight it like a whole analogue series and let it appear on both sides of a random split."
+    },
+    "rows_by_src_id": {
+      "1": 4333,
+      "37": 522
+    },
+    "src_id_note": "src_id 37 is BindingDB patent bioactivity data (see results/sources/). It is kept, because the measurements are IC50 values against the same target, but it is a different reporting regime from the primary literature (src_id 1) and is retained as a column so the decision can be revisited or tested.",
+    "data_validity_comments": {
+      "<none>": 4669,
+      "Outside typical range": 133,
+      "Potential transcription error": 53
+    },
+    "data_validity_decision": "ChEMBL's own validity comments are carried through as columns and reported, not used as an eighth filter: the seven-step cascade is the specified one, and removing these rows is a decision for Aadit. The counts above say exactly how much is at stake.",
+    "potential_duplicate_rows": 496
+  },
+  "censoring_reconciliation": {
+    "question": "Gate 1 measured 796 censored rows; step 5 of this cascade removes 791. Why?",
+    "gate1_rule": "Gate 1 filtered on the unit STRING only and logged the positive-finite-value check as a separate diagnostic, so rows with a usable unit but an unusable value still reached its relation test.",
+    "gate1_base_rows_recomputed": 5655,
+    "gate1_rows_failing_exact_relation_recomputed": 796,
+    "gate2_step5_rows_removed": 791,
+    "gate2_step5_censored_rows_removed": 791,
+    "difference": 5,
+    "difference_explained_by": {
+      "rows": [
+        744390,
+        1603666,
+        1603715,
+        1603720,
+        1603754
+      ],
+      "count": 5,
+      "what_they_are": "Rows whose standard_relation AND standard_value are both null, with units reported as nM. Gate 1 counted them as 'not exactly =' and so inside its 796. This cascade removes them one step earlier, at step 4, as value_not_a_number, because a row with no value cannot become a pIC50 whatever its relation says.",
+      "all_have_null_value": true
+    },
+    "identity_checks": {
+      "gate1_count_equals_step5_plus_difference": true,
+      "genuinely_censored_breakdown": {
+        "relation='<'": 54,
+        "relation='>'": 732,
+        "relation='>='": 1,
+        "relation='>>'": 4
+      },
+      "surviving_rows_agree_with_gate1": true
+    },
+    "conclusion": "No censored measurement is treated differently by the two gates. The 791/796 gap is five value-less rows removed one step earlier here, and the 4859 rows that survive the relation rule are identical in both."
+  },
+  "figures": [
+    "pic50_distribution.png",
+    "cascade_funnel.png"
+  ]
+}

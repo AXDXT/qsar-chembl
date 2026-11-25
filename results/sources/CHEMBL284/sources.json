@@ -1,0 +1,60 @@
+{
+  "target_chembl_id": "CHEMBL284",
+  "chembl_db_version": "ChEMBL_37",
+  "checked_utc": "2026-11-25T07:04:10+00:00",
+  "endpoint": "https://www.ebi.ac.uk/chembl/api/data/source.json",
+  "command": ".venv/bin/python -m src.sources CHEMBL284",
+  "rows_per_src_id": {
+    "1": 7109,
+    "37": 1281,
+    "38": 2,
+    "54": 2,
+    "65": 1,
+    "72": 2
+  },
+  "sources": {
+    "1": {
+      "src_comment": "The medicinal chemistry literature provides a valuable source of bioactivity data for drug like compounds. Bioactivity data is routinely extracted from our seven core MedChem journals (Bioorg Med Chem Lett, J Med Chem, Bioorg Med Chem, J Nat Prod, Eur J Med Chem, ACS Med Chem Lett, MedChemComm) but also includes selected publications from additional journals.",
+      "src_description": "Scientific Literature",
+      "src_id": 1,
+      "src_short_name": "LITERATURE",
+      "src_url": null
+    },
+    "37": {
+      "src_comment": "We have worked with the BindingDB team to integrate the bioactivity data that they have extracted from more than 1000 granted US patents published from 2013 onwards (https://www.bindingdb.org/bind/ByPatent.jsp) into ChEMBL.",
+      "src_description": "BindingDB Patent Bioactivity Data",
+      "src_id": 37,
+      "src_short_name": "BINDINGDB",
+      "src_url": "https://www.bindingdb.org/rwd/bind/index.jsp"
+    },
+    "38": {
+      "src_comment": "We have extracted bioactivity data from patents in SureChEMBL for a number of targets that are of interest to the NIH-funded Illuminating the Druggable Genome project. These are mainly targets that had little/no literature bioactivity data previously in ChEMBL but are members of druggable protein families.",
+      "src_description": "SureChEMBL Patent Bioactivity Data",
+      "src_id": 38,
+      "src_short_name": "PATENT",
+      "src_url": null
+    },
+    "54": {
+      "src_comment": "The Structural Genomics Consortium supports open-access research in drug discovery. The SGC Donated Chemical Probes project is a collaboration between pharmaceutical companies and academics with the goal to make chemical probes readily available through the SGC. Chemical probes are validated small molecules acting specifically at their targets; they are associated with high quality data and meet defined criteria. Control compounds are also provided and profiled. ",
+      "src_description": "SGC Frankfurt - Donated Chemical Probes",
+      "src_id": 54,
+      "src_short_name": "DONATED_PROBES",
+      "src_url": "https://www.sgc-ffm.uni-frankfurt.de/#!donateview"
+    },
+    "65": {
+      "src_comment": "Literature data from EUbOPEN Chemogenomic Library: bioactivity measurements have been extracted from primary literature by the SGC consortium to complement their Chemogenomic library. References to primary literature are indicated in the ACTIVITY_PROPERTIES table (TEXT_VALUE and STANDARD_TEXT_VALUE fields).",
+      "src_description": "EUbOPEN Chemogenomic Library Literature Data",
+      "src_id": 65,
+      "src_short_name": "LIT_EUBOPEN_CGL",
+      "src_url": null
+    },
+    "72": {
+      "src_comment": "Bioactivity data extracted from scientific articles - identified by Natural Language Processing - which contain information about associations of chemical probes, targets, and diseases. ",
+      "src_description": "Chemical Probe data from Scientific Literature",
+      "src_id": 72,
+      "src_short_name": "LIT_CHEM_PROBES",
+      "src_url": null
+    }
+  },
+  "note": "Row counts are over the whole raw pull, before any curation filter. Source descriptions are the API's own text, unmodified."
+}
