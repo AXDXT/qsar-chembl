@@ -9,7 +9,13 @@ recorded at the end with the fixed leakage probe. The executed walkthrough is
 judgement calls, the target variable and the measured replicate dispersion are recorded
 below under "Gate 2 curation cascade"; the split design and the fixed leakage probe follow
 it. Final human sign-off remains pending. Gate 3 baseline work is separately authorised
-in the build-room transcript; Gate 4 remains outside scope.
+in the build-room transcript. Gate 4 is now authorised there and is in progress:
+`src.nested_cv` implements the cached grouped nested search, and
+`src.gate4_training` verifies the saved inputs and exposes only training rows for
+the tuned descriptor control. No final Gate 4 model or held-out result is recorded
+yet. The fingerprint bit-length decision and combined model remain pending.
+Scaffold-primary success assessment is Claude-and-GPT's working assumption,
+pending Aadit's decision, with random-split results to be reported alongside it.
 
 This dataset is literature-reported bioactivity measurements. It does not establish, and this
 project does not claim, the efficacy, safety or suitability of any compound.

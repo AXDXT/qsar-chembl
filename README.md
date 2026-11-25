@@ -11,7 +11,9 @@ baselines under both saved splits. The full train/test table and uncertainty are
 [the Gate 3 handoff](GATE3_SIGNOFF.md),
 [DATA_CARD.md](DATA_CARD.md#gate-3-fixed-baselines) and
 [`results/baselines/CHEMBL284/baselines.md`](results/baselines/CHEMBL284/baselines.md).
-No Gate 4 model, hyperparameter search or combined feature model has been fitted.
+Gate 4 now has a resumable scaffold-grouped nested-CV search and a verified
+training-only command for its tuned descriptor control. No final Gate 4 model or
+combined feature model has been fitted, and no Gate 4 held-out evaluation has run.
 
 This project models literature-reported bioactivity measurements. Nothing in it claims or
 implies efficacy, safety or suitability of any compound.
@@ -30,6 +32,8 @@ implies efficacy, safety or suitability of any compound.
 | `src/leakage_probe.py` | one fixed Tanimoto nearest-neighbour leakage probe, scaffold-group bootstrap uncertainty; not a Gate 3 baseline |
 | `src/features.py` | Gate 3 featurisation: 12 declared RDKit descriptors and radius-2 Morgan bits from the standardised structures, cached with a manifest; no model fitted |
 | `src/baselines.py` | fixed training-mean and descriptor-only Random Forest baselines; exact saved splits, train/test metrics and scaffold-group bootstrap test intervals |
+| `src/nested_cv.py` | Gate 4 training-only grouped nested forest search, with incremental fit caches and outer-fold uncertainty |
+| `src/gate4_training.py` | verifies saved inputs and runs the tuned descriptor control on training rows only; no held-out evaluation |
 | `DATA_CARD.md` | provenance, licence, measured composition and known biases |
 | `data/raw/` | **immutable**: unmodified API responses only, each with `manifest.json` (sha256 per file) |
 | `data/curated/` | derived data (Gate 2 onwards), always regenerated from `data/raw/` by code |
@@ -55,9 +59,28 @@ implies efficacy, safety or suitability of any compound.
 .venv/bin/python -m src.leakage_probe CHEMBL284  # fixed probe on both saved splits, no tuning
 .venv/bin/python -m src.features CHEMBL284   # Gate 3 feature cache from the standardised structures
 .venv/bin/python -m src.baselines CHEMBL284  # fixed mean + descriptor RF on both exact saved splits
+.venv/bin/python -m src.gate4_training CHEMBL284 --n-jobs 4  # training-only tuned descriptor control
 .venv/bin/python scripts/run_gate2_notebook.py  # execute/save the visual walkthrough offline
 .venv/bin/python scripts/check_data_card_numbers.py  # curation figures and sign-off tables vs logs
 ```
+
+The Gate 4 control command is separate from `run_all.sh` while the combined-model
+pipeline is being built. It defaults to both saved training pools, scaffold first;
+`--split scaffold` or `--split random` runs just one. Both nested loops group on
+the saved Gate 2 scaffold labels, including within random-split training. This
+estimates transfer across scaffolds, even though the eventual random held-out
+evaluation will describe interpolation. It computes no saved test prediction or
+metric. Completed fits resume under `results/gate4_training/<TARGET>/`; a new
+`--cache-dir /tmp/gate4-clean-build` starts a clean rebuild. Incompatible data,
+settings, library versions or search/adapter code abort rather than silently reuse
+the cache. A timestamp-only curation rerun retains the same search identity.
+Each search directory's `report.json` wraps its results and checksum; its
+`manifest.json` records data identities, feature specification and fold plans.
+The bit-length decision, combined model, final model persistence and one final
+held-out evaluation remain pending. Scaffold-primary success assessment is
+Claude-and-GPT's working assumption pending Aadit's decision; random results
+will be reported alongside it. The repeat-dispersion reference, code licence and
+final Gates 2 and 3 sign-off also remain Aadit's decisions.
 
 The Gate 2 notebook can also be opened in Jupyter with the repo's `.venv` Python
 kernel and run from top to bottom. Its final cell checks raw immutability, byte-identical
