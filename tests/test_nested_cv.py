@@ -52,14 +52,14 @@ def test_five_by_five_grouping_every_fit_is_isolated_and_outer_predictions_are_o
 
     monkeypatch.setattr(cv, "RandomForestRegressor", AuditedForest)
 
-    def spy(rows, x, y, fold, parameters):
+    def spy(rows, x, y, fold, parameters, **kwargs):
         train, validation = fold["train"], fold["validation"]
         assert set(train).isdisjoint(validation)
         assert {rows[i]["scaffold"] for i in train}.isdisjoint(
             rows[i]["scaffold"] for i in validation)
         seen.append(copy.deepcopy(fold))
         active["fold"] = fold
-        return actual(rows, x, y, fold, parameters)
+        return actual(rows, x, y, fold, parameters, **kwargs)
 
     monkeypatch.setattr(cv, "_fit", spy)
     report = _run(tmp_path / "cache", rows, x)
@@ -114,26 +114,75 @@ def test_changing_outer_validation_labels_cannot_change_its_inner_selection(tmp_
 def test_interrupted_search_resumes_each_completed_fit_and_complete_rerun_never_fits(tmp_path, monkeypatch):
     actual, calls = cv._fit, []
 
-    def interrupted(*args):
+    def interrupted(*args, **kwargs):
         calls.append(1)
         if len(calls) == 4:
             raise KeyboardInterrupt("simulated turn cutoff")
-        return actual(*args)
+        return actual(*args, **kwargs)
 
     monkeypatch.setattr(cv, "_fit", interrupted)
     with pytest.raises(KeyboardInterrupt):
         _run(tmp_path / "cache")
     assert len(list((tmp_path / "cache").glob("outer*-fold*.json"))) == 3
     assert not (tmp_path / "cache" / "report.json").exists()
-    resumed = _run(tmp_path / "cache")
+    resumed = _run(tmp_path / "cache", n_jobs=2)
     assert len(calls) == 66  # 65 completed fits plus the interrupted one, no repeats
+    records = [json.loads(path.read_text())["result"]
+               for path in (tmp_path / "cache").glob("*.json")
+               if path.name not in {"manifest.json", "report.json"}]
+    assert sum(result["n_jobs"] == 1 for result in records) == 3
+    assert sum(result["n_jobs"] == 2 for result in records) == 62
+    assert resumed["timing"]["n_jobs"] == 2
 
-    def forbidden(*args):
+    def forbidden(*args, **kwargs):
         pytest.fail("A completed cached run must never refit")
 
     monkeypatch.setattr(cv, "_fit", forbidden)
-    assert resumed == _run(tmp_path / "cache")
+    # Completed reports retain the original timings and worker metadata too.
+    assert resumed == _run(tmp_path / "cache", n_jobs=3)
     assert not list((tmp_path / "cache").glob(".pending-*"))
+
+
+def test_worker_counts_preserve_predictions_scores_and_selections(tmp_path):
+    serial = _run(tmp_path / "serial", n_jobs=1)
+    parallel = _run(tmp_path / "parallel", n_jobs=2)
+    assert serial["identity_sha256"] == parallel["identity_sha256"]
+    for name, workers in (("serial", 1), ("parallel", 2)):
+        report = serial if workers == 1 else parallel
+        assert report["timing"]["n_jobs"] == workers
+        for path in (tmp_path / name).glob("*.json"):
+            if path.name not in {"manifest.json", "report.json"}:
+                assert json.loads(path.read_text())["result"]["n_jobs"] == workers
+    assert [{k: v for k, v in p.items() if k != "predicted_pIC50"}
+            for p in serial["oof_predictions"]] == [
+        {k: v for k, v in p.items() if k != "predicted_pIC50"}
+        for p in parallel["oof_predictions"]]
+    np.testing.assert_allclose(
+        [p["predicted_pIC50"] for p in serial["oof_predictions"]],
+        [p["predicted_pIC50"] for p in parallel["oof_predictions"]], rtol=0, atol=1e-12)
+    assert serial["selection_stability"] == parallel["selection_stability"]
+    for left, right in zip(serial["outer_folds"], parallel["outer_folds"], strict=True):
+        np.testing.assert_allclose(list(left["metrics"].values()),
+                                   list(right["metrics"].values()), rtol=0, atol=1e-12)
+    serial_searches = [r["selection"] for r in serial["outer_folds"]] + [serial["final_selection"]]
+    parallel_searches = [r["selection"] for r in parallel["outer_folds"]] + [parallel["final_selection"]]
+    for left, right in zip(serial_searches, parallel_searches, strict=True):
+        assert left["selected_parameters"] == right["selected_parameters"]
+        assert left["selected_candidate"] == right["selected_candidate"]
+        for a, b in zip(left["candidates"], right["candidates"], strict=True):
+            assert a["parameters"] == b["parameters"]
+            np.testing.assert_allclose(a["mean_validation_rmse"], b["mean_validation_rmse"],
+                                       rtol=0, atol=1e-12)
+            np.testing.assert_allclose([list(m.values()) for m in a["fold_metrics"]],
+                                       [list(m.values()) for m in b["fold_metrics"]],
+                                       rtol=0, atol=1e-12)
+
+
+@pytest.mark.parametrize("workers", [0, -1, True, 1.5, "2", None])
+def test_invalid_worker_count_aborts_before_creating_cache(tmp_path, workers):
+    with pytest.raises(ValueError, match="n_jobs must be a positive worker count"):
+        _run(tmp_path / "cache", n_jobs=workers)
+    assert not (tmp_path / "cache").exists()
 
 
 @pytest.mark.parametrize("changed", ["features", "labels", "groups", "keys", "row_order", "source",
@@ -227,8 +276,17 @@ def test_invalid_inputs_abort_before_creating_cache(tmp_path, invalid):
 
 
 def test_default_grid_fixes_baseline_tree_count_and_only_searches_two_axes():
-    assert len(list(cv.ParameterGrid(cv.DEFAULT_GRID))) == 6
+    assert len(list(cv.ParameterGrid(cv.DEFAULT_GRID))) == 8
     assert set(cv.DEFAULT_GRID) == {"max_features", "min_samples_leaf"}
     from src.baselines import RF_SPEC
     assert RF_SPEC["n_estimators"] == 200
     assert RF_SPEC["n_jobs"] == 1 and RF_SPEC["random_state"] == cv.SEED
+
+
+def test_default_grid_contains_the_exact_gate3_baseline():
+    from src.baselines import RF_SPEC
+    baseline = {axis: RF_SPEC[axis] for axis in cv.DEFAULT_GRID}
+    assert baseline == {"max_features": 1.0, "min_samples_leaf": 1}
+    assert baseline in list(cv.ParameterGrid(cv.DEFAULT_GRID))
+    assert cv.RandomForestRegressor(**{**RF_SPEC, **baseline}).get_params() == (
+        cv.RandomForestRegressor(**RF_SPEC).get_params())

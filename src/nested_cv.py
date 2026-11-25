@@ -36,20 +36,28 @@ from src.leakage_probe import BOOTSTRAP_REPEATS, clustered_intervals, point_metr
 from src.retrieve import _sha256
 from src.splits import assert_split_integrity
 
-# Six candidates, fixed before results. Feature subsampling spans sqrt(p), a
-# modest fraction and a larger fraction: sparse Morgan bits can otherwise crowd
-# out the dense descriptor block. Leaf size tests modest regularisation against
-# fully grown trees. Keep the baseline's 200 trees, seed and one worker fixed so
-# the tuning control changes only the two declared axes. No search parallelism.
-DEFAULT_GRID = {"max_features": ["sqrt", 0.1, 0.33], "min_samples_leaf": [1, 3]}
+# Eight candidates, fixed before results. Feature subsampling spans sqrt(p), a
+# modest fraction, a larger fraction and all features: sparse Morgan bits can
+# otherwise crowd out the dense descriptor block. 1.0 with leaf 1 IS the Gate 3
+# forest, so every block's search contains the untuned baseline and tuning can
+# never be forced away from it. Leaf size tests modest regularisation against
+# fully grown trees. Keep the baseline's 200 trees and seed fixed so the tuning
+# control changes only the two declared axes. Worker count changes speed only.
+DEFAULT_GRID = {"max_features": ["sqrt", 0.1, 0.33, 1.0], "min_samples_leaf": [1, 3]}
 GRID_RATIONALE = {
-    "max_features": "sqrt(p), 10% and 33% vary feature competition and tree diversity, "
-                    "especially for dense descriptors alongside sparse Morgan bits.",
+    "max_features": "sqrt(p), 10%, 33% and 100% vary feature competition and tree diversity, "
+                    "especially for dense descriptors alongside sparse Morgan bits. 100% is the "
+                    "Gate 3 setting and, on the 12-column descriptor block, the only value that "
+                    "lets a split consider every descriptor (sqrt and 33% both round to 3 there, "
+                    "10% to 1; the duplicate resolves by grid order).",
     "min_samples_leaf": "1 versus 3 tests modest regularisation of the Gate 3 train/test gap.",
+    "baseline_in_grid": "max_features=1.0 with min_samples_leaf=1 reproduces the Gate 3 forest, "
+                        "so the tuned control's candidate set contains the untuned baseline.",
     "n_estimators": "Fixed at the Gate 3 count, not selected; more trees reduce Monte Carlo "
                     "variation. Keeping the count fixed isolates the two search axes.",
-    "compute": "Default grid: six candidates; sequential fits with n_jobs=1. Completed fits are cached "
-               "individually, including timing, so interruption loses at most one fit.",
+    "compute": "Default grid: eight candidates; fits run one after another, each forest using "
+               "n_jobs workers. Completed fits are cached individually, including timing, so "
+               "interruption loses at most one fit.",
 }
 
 
@@ -129,25 +137,27 @@ def _folds(rows: list[dict], indices: list[int], count: int) -> list[dict]:
     return result
 
 
-def _fit(rows, x, y, fold, parameters) -> dict:
+def _fit(rows, x, y, fold, parameters, n_jobs=1) -> dict:
+    # Per-tree seeds are drawn before dispatch, so workers change speed, not the trees;
+    # prediction sums may differ only in floating-point order (tested to 1e-12).
     start = perf_counter()
-    model = RandomForestRegressor(**{**RF_SPEC, **parameters})
+    model = RandomForestRegressor(**{**RF_SPEC, **parameters, "n_jobs": n_jobs})
     model.fit(x[fold["train"]], y[fold["train"]])
     predicted = model.predict(x[fold["validation"]])
     predictions = [{"inchikey": rows[i]["inchikey"], "scaffold": rows[i]["scaffold"],
                     "observed_pIC50": float(y[i]), "predicted_pIC50": float(value)}
                    for i, value in zip(fold["validation"], predicted, strict=True)]
     return {"metrics": point_metrics(predictions), "predictions": predictions,
-            "fit_predict_seconds": perf_counter() - start}
+            "fit_predict_seconds": perf_counter() - start, "n_jobs": n_jobs}
 
 
-def _search(rows, x, y, folds, candidates, cache, prefix) -> dict:
+def _search(rows, x, y, folds, candidates, cache, prefix, n_jobs) -> dict:
     scores = []
     for candidate, parameters in enumerate(candidates):
         results = []
         for number, fold in enumerate(folds):
             result = cache.get(f"{prefix}-candidate{candidate}-fold{number}",
-                              lambda: _fit(rows, x, y, fold, parameters))
+                              lambda: _fit(rows, x, y, fold, parameters, n_jobs=n_jobs))
             results.append(result)
         scores.append({"parameters": parameters,
                        "mean_validation_rmse": float(np.mean([r["metrics"]["rmse"] for r in results])),
@@ -162,7 +172,7 @@ def _search(rows, x, y, folds, candidates, cache, prefix) -> dict:
 def run_nested_cv(rows: list[dict], values: np.ndarray, cache_dir: Path, *,
                   feature_spec: dict, source_checksums: dict[str, str],
                   grid: dict | None = None, folds: int = 5,
-                  bootstrap_repeats: int = BOOTSTRAP_REPEATS) -> dict:
+                  bootstrap_repeats: int = BOOTSTRAP_REPEATS, n_jobs: int = 1) -> dict:
     """Estimate generalisation and select final parameters WITHOUT held-out rows.
 
     rows must retain 'partition=train' from the saved assignments, plus inchikey,
@@ -177,6 +187,9 @@ def run_nested_cv(rows: list[dict], values: np.ndarray, cache_dir: Path, *,
     Outer predictions are strictly out of fold; full-training selection is separate
     and never uses outer scores. The bootstrap conditions on fixed OOF predictions;
     outer-fold spread also reflects refitting on overlapping training subsets.
+
+    n_jobs is the per-forest worker count. It is deliberately NOT part of the cache
+    identity, so a resumed run on a machine with different cores reuses earlier fits.
     """
     if not rows or any(r.get("partition") != "train" for r in rows):
         raise ValueError("Nested CV accepts saved training rows only; held-out rows are forbidden")
@@ -195,6 +208,8 @@ def run_nested_cv(rows: list[dict], values: np.ndarray, cache_dir: Path, *,
         raise ValueError("Need at least two CV folds")
     if bootstrap_repeats < 2:
         raise ValueError("Need at least two bootstrap draws")
+    if not isinstance(n_jobs, int) or isinstance(n_jobs, bool) or n_jobs < 1:
+        raise ValueError("n_jobs must be a positive worker count, logged as given")
     grid = DEFAULT_GRID if grid is None else grid
     if set(grid) != {"max_features", "min_samples_leaf"}:
         raise ValueError("Search only max_features and min_samples_leaf; tree count is fixed")
@@ -229,14 +244,15 @@ def run_nested_cv(rows: list[dict], values: np.ndarray, cache_dir: Path, *,
         start = perf_counter()
         outer_results, predictions = [], []
         for number, fold in enumerate(outer):
-            selection = _search(rows, x, y, inner[number], candidates, cache, f"outer{number}-inner")
+            selection = _search(rows, x, y, inner[number], candidates, cache,
+                                f"outer{number}-inner", n_jobs)
             evaluation = cache.get(f"outer{number}-evaluation", lambda: _fit(
-                rows, x, y, fold, selection["selected_parameters"]))
+                rows, x, y, fold, selection["selected_parameters"], n_jobs=n_jobs))
             predictions.extend({**r, "outer_fold": number} for r in evaluation["predictions"])
             outer_results.append({"outer_fold": number, "selection": selection,
                                   "metrics": evaluation["metrics"],
                                   "fit_predict_seconds": evaluation["fit_predict_seconds"]})
-        final_selection = _search(rows, x, y, final, candidates, cache, "final-inner")
+        final_selection = _search(rows, x, y, final, candidates, cache, "final-inner", n_jobs)
         counts = Counter(_json(r["selection"]["selected_parameters"]) for r in outer_results)
         spread = {}
         for metric in ("rmse", "mae", "r2"):
@@ -266,8 +282,10 @@ def run_nested_cv(rows: list[dict], values: np.ndarray, cache_dir: Path, *,
             "timing": {"cumulative_fit_predict_seconds": fit_seconds,
                        "completion_invocation_seconds": perf_counter() - start,
                        "note": "Cumulative fit times include reused work; invocation time may be "
-                               "a resumed run. Cached reports retain their original timings.",
-                       "n_jobs": RF_SPEC["n_jobs"], "search_workers": 1},
+                               "a resumed run. Cached reports retain their original timings. "
+                               "n_jobs is the worker count of the invocation that completed "
+                               "the report; each cached fit records its own.",
+                       "n_jobs": n_jobs, "search_workers": 1},
             "heldout_evaluations": 0,
             "disclaimer": "Literature/patent-reported IC50; no efficacy, safety or suitability claim.",
         }
