@@ -1,0 +1,5 @@
+target_chembl_id,target_name,chembl_release,measured_utc,total_records,approx_filtered_records,approx_distinct_compounds,surviving_assays,surviving_documents,run_log
+CHEMBL220,Acetylcholinesterase,ChEMBL_37,2026-11-25T06:33:00+00:00,20132,7646,6134,965,649,CHEMBL220_20261125T063300727419Z.json
+CHEMBL203,Epidermal growth factor receptor,ChEMBL_37,2026-11-25T06:36:17+00:00,58847,18381,10524,1910,1022,CHEMBL203_20261125T063617396212Z.json
+CHEMBL4822,Beta-secretase 1,ChEMBL_37,2026-11-25T06:38:01+00:00,27804,12893,8272,702,445,CHEMBL4822_20261125T063801514352Z.json
+CHEMBL284,Dipeptidyl peptidase 4,ChEMBL_37,2026-11-25T06:38:49+00:00,8397,4859,4004,337,258,CHEMBL284_20261125T063849168172Z.json

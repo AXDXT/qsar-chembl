@@ -1,0 +1,1401 @@
+{
+  "target_chembl_id": "CHEMBL220",
+  "target": {
+    "cross_references": [],
+    "organism": "Homo sapiens",
+    "pref_name": "Acetylcholinesterase",
+    "species_group_flag": false,
+    "target_chembl_id": "CHEMBL220",
+    "target_components": [
+      {
+        "accession": "P22303",
+        "component_description": "Acetylcholinesterase",
+        "component_id": 357,
+        "component_type": "PROTEIN",
+        "relationship": "SINGLE PROTEIN",
+        "target_component_synonyms": [
+          {
+            "component_synonym": "3.1.1.7",
+            "syn_type": "EC_NUMBER"
+          },
+          {
+            "component_synonym": "Acetylcholinesterase",
+            "syn_type": "UNIPROT"
+          },
+          {
+            "component_synonym": "AChE",
+            "syn_type": "UNIPROT"
+          },
+          {
+            "component_synonym": "ACHE",
+            "syn_type": "GENE_SYMBOL"
+          }
+        ],
+        "target_component_xrefs": [
+          {
+            "xref_id": "P22303",
+            "xref_name": null,
+            "xref_src_db": "AlphaFoldDB"
+          },
+          {
+            "xref_id": "P22303",
+            "xref_name": null,
+            "xref_src_db": "ExpressionAtlas"
+          },
+          {
+            "xref_id": "GO:0005576",
+            "xref_name": "extracellular region",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0005615",
+            "xref_name": "extracellular space",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0005634",
+            "xref_name": "nucleus",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0005794",
+            "xref_name": "Golgi apparatus",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0005886",
+            "xref_name": "plasma membrane",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0009986",
+            "xref_name": "cell surface",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0016020",
+            "xref_name": "membrane",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0031594",
+            "xref_name": "neuromuscular junction",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0043083",
+            "xref_name": "synaptic cleft",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0045202",
+            "xref_name": "synapse",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0048471",
+            "xref_name": "perinuclear region of cytoplasm",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0098552",
+            "xref_name": "side of membrane",
+            "xref_src_db": "GoComponent"
+          },
+          {
+            "xref_id": "GO:0001540",
+            "xref_name": "amyloid-beta binding",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0003990",
+            "xref_name": "acetylcholinesterase activity",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0004104",
+            "xref_name": "cholinesterase activity",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0005515",
+            "xref_name": "protein binding",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0016787",
+            "xref_name": "hydrolase activity",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0017171",
+            "xref_name": "serine hydrolase activity",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0042166",
+            "xref_name": "acetylcholine binding",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0042802",
+            "xref_name": "identical protein binding",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0042803",
+            "xref_name": "protein homodimerization activity",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0043236",
+            "xref_name": "laminin binding",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0052689",
+            "xref_name": "carboxylic ester hydrolase activity",
+            "xref_src_db": "GoFunction"
+          },
+          {
+            "xref_id": "GO:0001507",
+            "xref_name": "acetylcholine catabolic process in synaptic cleft",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0001919",
+            "xref_name": "regulation of receptor recycling",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0002076",
+            "xref_name": "osteoblast development",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0006581",
+            "xref_name": "acetylcholine catabolic process",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0007155",
+            "xref_name": "cell adhesion",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0007399",
+            "xref_name": "nervous system development",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0007416",
+            "xref_name": "synapse assembly",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0031623",
+            "xref_name": "receptor internalization",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0032223",
+            "xref_name": "negative regulation of synaptic transmission, cholinergic",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0050714",
+            "xref_name": "positive regulation of protein secretion",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0060041",
+            "xref_name": "retina development in camera-type eye",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0095500",
+            "xref_name": "acetylcholine receptor signaling pathway",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "GO:0120162",
+            "xref_name": "positive regulation of cold-induced thermogenesis",
+            "xref_src_db": "GoProcess"
+          },
+          {
+            "xref_id": "HGNC:108",
+            "xref_name": "ACHE",
+            "xref_src_db": "HGNC"
+          },
+          {
+            "xref_id": "P22303",
+            "xref_name": null,
+            "xref_src_db": "IntAct"
+          },
+          {
+            "xref_id": "IPR000997",
+            "xref_name": "Cholinesterase",
+            "xref_src_db": "InterPro"
+          },
+          {
+            "xref_id": "IPR002018",
+            "xref_name": "CarbesteraseB",
+            "xref_src_db": "InterPro"
+          },
+          {
+            "xref_id": "IPR014788",
+            "xref_name": "AChE_tetra",
+            "xref_src_db": "InterPro"
+          },
+          {
+            "xref_id": "IPR019819",
+            "xref_name": "Carboxylesterase_B_CS",
+            "xref_src_db": "InterPro"
+          },
+          {
+            "xref_id": "IPR019826",
+            "xref_name": "Carboxylesterase_B_AS",
+            "xref_src_db": "InterPro"
+          },
+          {
+            "xref_id": "IPR029058",
+            "xref_name": "AB_hydrolase_fold",
+            "xref_src_db": "InterPro"
+          },
+          {
+            "xref_id": "IPR050654",
+            "xref_name": "AChE-related_enzymes",
+            "xref_src_db": "InterPro"
+          },
+          {
+            "xref_id": "PTHR43918",
+            "xref_name": "ACETYLCHOLINESTERASE",
+            "xref_src_db": "PANTHER"
+          },
+          {
+            "xref_id": "PTHR43918:SF11",
+            "xref_name": "ACETYLCHOLINESTERASE",
+            "xref_src_db": "PANTHER"
+          },
+          {
+            "xref_id": "1B41",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "1F8U",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "1VZJ",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "2X8B",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "3LII",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4BDT",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4EY4",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4EY5",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4EY6",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4EY7",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4EY8",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4M0E",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4M0F",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "4PQE",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "5FOQ",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "5FPQ",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "5HF5",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "5HF6",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "5HF8",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "5HF9",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "5HFA",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "5HQ3",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6CQT",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6CQU",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6CQV",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6CQW",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6CQX",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6CQY",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6CQZ",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6F25",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6NEA",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6NTG",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6NTH",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6NTK",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6NTL",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6NTM",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6NTN",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6NTO",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O4W",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O4X",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O50",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O52",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O5R",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O5S",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O5V",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O66",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6O69",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6U34",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6U37",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6U3P",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6WUV",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6WUY",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6WUZ",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6WV1",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6WVC",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6WVO",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6WVP",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6WVQ",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "6ZWE",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7D9O",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7D9P",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7D9Q",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7E3D",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7E3H",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7P1N",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7P1P",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7RB5",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7RB6",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7RB7",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "7XN1",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "8AEN",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "8AEV",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "8DT2",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "8DT4",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "8DT5",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "8DT7",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "9OMS",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "9OMT",
+            "xref_name": null,
+            "xref_src_db": "PDB"
+          },
+          {
+            "xref_id": "1B41",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "1F8U",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "1VZJ",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "2X8B",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "3LII",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4BDT",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4EY4",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4EY5",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4EY6",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4EY7",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4EY8",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4M0E",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4M0F",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "4PQE",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "5FOQ",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "5FPQ",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "5HF5",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "5HF6",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "5HF8",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "5HF9",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "5HFA",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "5HQ3",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6CQT",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6CQU",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6CQV",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6CQW",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6CQX",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6CQY",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6CQZ",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6F25",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6NEA",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6NTG",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6NTH",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6NTK",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6NTL",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6NTM",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6NTN",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6NTO",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O4W",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O4X",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O50",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O52",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O5R",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O5S",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O5V",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O66",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6O69",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6U34",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6U37",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6U3P",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6WUV",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6WUY",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6WUZ",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6WV1",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6WVC",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6WVO",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6WVP",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6WVQ",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "6ZWE",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7D9O",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7D9P",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7D9Q",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7E3D",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7E3H",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7P1N",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7P1P",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7RB5",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7RB6",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7RB7",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "7XN1",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "8AEN",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "8AEV",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "8DT2",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "8DT4",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "8DT5",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "8DT7",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "9OMS",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "9OMT",
+            "xref_name": "A",
+            "xref_src_db": "PDBe"
+          },
+          {
+            "xref_id": "PF00135",
+            "xref_name": "COesterase",
+            "xref_src_db": "Pfam"
+          },
+          {
+            "xref_id": "PF08674",
+            "xref_name": "AChE_tetra",
+            "xref_src_db": "Pfam"
+          },
+          {
+            "xref_id": "PA20",
+            "xref_name": "acetylcholinesterase (Yt blood group)",
+            "xref_src_db": "PharmGKB"
+          },
+          {
+            "xref_id": "P22303",
+            "xref_name": null,
+            "xref_src_db": "Pharos"
+          },
+          {
+            "xref_id": "R-HSA-112311",
+            "xref_name": "Neurotransmitter clearance",
+            "xref_src_db": "Reactome"
+          },
+          {
+            "xref_id": "R-HSA-1483191",
+            "xref_name": "Synthesis of PC",
+            "xref_src_db": "Reactome"
+          },
+          {
+            "xref_id": "R-HSA-422085",
+            "xref_name": "Synthesis, secretion, and deacylation of Ghrelin",
+            "xref_src_db": "Reactome"
+          },
+          {
+            "xref_id": "A4D2E2",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "B7ZKZ0",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "D6W5X7",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "P22303",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "Q16169",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "Q29S23",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "Q2M324",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "Q504V3",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "Q53F46",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "Q86TM9",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "Q86YX9",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          },
+          {
+            "xref_id": "Q9BXP7",
+            "xref_name": "Acetylcholinesterase",
+            "xref_src_db": "UniProt"
+          }
+        ]
+      }
+    ],
+    "target_type": "SINGLE PROTEIN",
+    "tax_id": 9606
+  },
+  "started_utc": "2026-11-25T06:31:40+00:00",
+  "finished_utc": "2026-11-25T06:33:00+00:00",
+  "status_endpoint": "https://www.ebi.ac.uk/chembl/api/data/status.json",
+  "status_before": {
+    "activities": 24527044,
+    "chembl_db_version": "ChEMBL_37",
+    "chembl_release_date": "2026-05-01",
+    "compound_records": 3824604,
+    "disinct_compounds": 2921148,
+    "publications": 101100,
+    "status": "UP",
+    "targets": 18552
+  },
+  "status_after": {
+    "activities": 24527044,
+    "chembl_db_version": "ChEMBL_37",
+    "chembl_release_date": "2026-05-01",
+    "compound_records": 3824604,
+    "disinct_compounds": 2921148,
+    "publications": 101100,
+    "status": "UP",
+    "targets": 18552
+  },
+  "client_version": "0.10.9",
+  "query": {
+    "resource": "activity",
+    "client_call": "new_client.activity.filter(target_chembl_id='CHEMBL220').only(['activity_id', 'assay_type', 'standard_type', 'standard_units', 'standard_relation', 'standard_value', 'target_organism', 'target_tax_id', 'molecule_chembl_id', 'assay_chembl_id', 'document_chembl_id']).order_by('activity_id')",
+    "filters": {
+      "target_chembl_id": "CHEMBL220"
+    },
+    "equivalent_url": "https://www.ebi.ac.uk/chembl/api/data/activity.json?target_chembl_id=CHEMBL220&only=activity_id,assay_type,standard_type,standard_units,standard_relation,standard_value,target_organism,target_tax_id,molecule_chembl_id,assay_chembl_id,document_chembl_id&order_by=activity_id",
+    "page_size": 1000,
+    "client_cache": "disabled",
+    "note": "All target activities fetched with a field projection; filters applied locally for counts only.",
+    "fields_requested": [
+      "activity_id",
+      "assay_type",
+      "standard_type",
+      "standard_units",
+      "standard_relation",
+      "standard_value",
+      "target_organism",
+      "target_tax_id",
+      "molecule_chembl_id",
+      "assay_chembl_id",
+      "document_chembl_id"
+    ],
+    "max_concurrent_pages": 4
+  },
+  "api_total_count": 20132,
+  "filter_policy": {
+    "binding_assay": "assay_type == 'B'",
+    "ic50": "standard_type == 'IC50'",
+    "human_target": "target_organism == 'Homo sapiens' and str(target_tax_id) == '9606'",
+    "molar_units": "standard_units in ['M', 'mM', 'uM', 'µM', 'μM', 'nM', 'pM', 'fM'] (molar concentrations convertible to nM)",
+    "exact_relation": "standard_relation == '='; censored, approximate and missing relations excluded",
+    "positive_finite_value": "Diagnostic only, after the headline count: standard_value parses as a finite number > 0",
+    "distinct_compounds": "unique nonempty molecule_chembl_id among surviving rows; no structure processing",
+    "organism_interpretation": "Target organism, not assay expression host; candidates must have one human protein component",
+    "limitations": "Count-only approximation of Gate 2: no salts, stereochemistry, duplicates, conflicting replicates, assay quality or structure checks",
+    "unit_limitations": "Conservative whitelist of plain molar units; uncommon scaled unit strings are excluded pending interpretation in Gate 2"
+  },
+  "counts": {
+    "cascade": {
+      "all_records": 20132,
+      "binding_assay": 18730,
+      "ic50": 9882,
+      "human_target": 9882,
+      "molar_units": 8531,
+      "exact_relation": 7646,
+      "positive_finite_value": 7645
+    },
+    "filtered_records": 7646,
+    "distinct_compounds": 6134,
+    "survivors_missing_compound_id": 0,
+    "distinct_surviving_assays": 965,
+    "distinct_surviving_documents": 649,
+    "raw_distributions": {
+      "assay_type": {
+        "A": 180,
+        "B": 18730,
+        "F": 1185,
+        "T": 37
+      },
+      "standard_type": {
+        "% Ctrl": 8,
+        "% Inhibition of Control Values (Mean n=2)": 8,
+        "% of inhibition": 2,
+        "% specific binding": 2,
+        "%max": 59,
+        "1/kmax": 4,
+        "1/kobsd-ka": 19,
+        "AC50": 1006,
+        "Activity": 1761,
+        "Drug degradation": 2,
+        "EC30": 24,
+        "EC50": 63,
+        "Emax": 2,
+        "FC": 12,
+        "Flu intensity": 3,
+        "Fold IC50": 1,
+        "IC": 1,
+        "IC33": 1,
+        "IC50": 10079,
+        "INH": 2,
+        "IZ": 2,
+        "Imax": 68,
+        "Inhibition": 2611,
+        "K": 640,
+        "KHOX": 5,
+        "KOX": 16,
+        "KSV": 4,
+        "Ka": 33,
+        "Kb": 3,
+        "Kc": 2,
+        "Kd": 296,
+        "Kd(app)": 3,
+        "Kdiss": 22,
+        "Ki": 1970,
+        "Kic": 1,
+        "Kinact": 36,
+        "Km": 19,
+        "Kr": 225,
+        "Kr/kmax": 4,
+        "Ks": 14,
+        "Log IC50": 4,
+        "MIC": 57,
+        "Ratio": 156,
+        "Ratio IC50": 103,
+        "Ratio Ki": 3,
+        "Reactivation": 49,
+        "Relative Selectivity": 6,
+        "Rmax": 36,
+        "Selectivity": 6,
+        "Stability": 1,
+        "T1/2": 8,
+        "TIME": 70,
+        "Tm": 2,
+        "Vmax": 17,
+        "Vmax/Km": 3,
+        "XC50": 1,
+        "[EOP']infinity/[EOH]infinity": 19,
+        "alphaKi": 6,
+        "deltaG": 3,
+        "effect": 1,
+        "k eff": 4,
+        "k eff (rel)": 4,
+        "k-2": 14,
+        "k2": 14,
+        "k3": 2,
+        "kHOX": 83,
+        "kOX": 67,
+        "k_obs": 19,
+        "k_off": 49,
+        "ka": 4,
+        "ka/kr": 4,
+        "kaKr/kr": 4,
+        "kb": 4,
+        "kn": 24,
+        "kon": 49,
+        "kr": 28,
+        "logIC50": 60,
+        "logRA": 80,
+        "max activation": 15,
+        "pIC50": 19,
+        "t1/2": 1
+      },
+      "standard_units": {
+        "%": 4110,
+        "%/hr": 1,
+        "/M/min": 55,
+        "/M/s": 8,
+        "/hr": 5,
+        "/mM/min": 296,
+        "/min": 361,
+        "/min/M": 1,
+        "/s": 8,
+        "10'-1nmol": 3,
+        "10'-2nmol": 2,
+        "10'-3/min": 17,
+        "10'-4nmol": 2,
+        "10'-8mol/min": 2,
+        "10'2/M/min": 1,
+        "10'3/M/min": 36,
+        "10'3L/M": 4,
+        "10'3pM": 1,
+        "10'4/M/min": 6,
+        "10'5/M/min": 4,
+        "10'5L/M": 4,
+        "10'5pM": 3,
+        "10'6/M/min": 2,
+        "10'6pM": 2,
+        "10'7/M/min": 4,
+        "10'8/M/min": 3,
+        "10^-3/min": 42,
+        "10^-4microM": 2,
+        "10^3/M": 1,
+        "10^4/M": 3,
+        "10^8M": 2,
+        "10^9/M/min": 1,
+        "10e-3 1/s": 28,
+        "<missing>": 3200,
+        "M": 36,
+        "M-1 min-1": 199,
+        "M-min": 4,
+        "U/min": 3,
+        "degrees C": 2,
+        "deltaA/min": 6,
+        "hr": 78,
+        "kcal/mol": 3,
+        "mAU/min": 4,
+        "mM": 33,
+        "mM/min": 85,
+        "min": 23,
+        "min-1": 36,
+        "mm": 2,
+        "nM": 11090,
+        "ng": 16,
+        "nmol": 1,
+        "s-1": 68,
+        "uM": 109,
+        "ug": 31,
+        "ug.mL-1": 83
+      },
+      "standard_relation": {
+        "<": 161,
+        "<=": 30,
+        "<missing>": 3698,
+        "=": 14023,
+        ">": 2210,
+        ">=": 4,
+        ">>": 2,
+        "~": 4
+      },
+      "target_organism": {
+        "Homo sapiens": 20132
+      }
+    }
+  },
+  "command": ".venv/bin/python -m src.candidates CHEMBL220"
+}

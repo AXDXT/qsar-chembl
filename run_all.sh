@@ -13,6 +13,12 @@ TARGET="${1:-CHEMBL220}"
 "$PY" -m compileall -q -x '/\._' src
 "$PY" -m pytest -q
 
+if [[ -f "results/candidate_counts/candidate_counts.csv" ]]; then
+    echo "Gate 1 candidate-count snapshot exists; skipping live recount."
+else
+    "$PY" -m src.candidates
+fi
+
 if [[ -f "data/raw/${TARGET}/manifest.json" ]]; then
     echo "data/raw/${TARGET} already pulled; skipping retrieval."
 else
