@@ -17,6 +17,7 @@ SEED = 42
 ROOT = Path(__file__).resolve().parent.parent
 DATA_RAW = ROOT / "data" / "raw"          # immutable: unmodified API responses only
 DATA_CURATED = ROOT / "data" / "curated"  # derived from data/raw by code in src/
+DATA_FEATURES = ROOT / "data" / "features"  # Gate 3 feature cache, derived from data/curated
 RESULTS = ROOT / "results"
 
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"

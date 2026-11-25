@@ -50,6 +50,10 @@ fi
 # Gate 2 only: one fixed, untuned memorisation probe, never a Gate 3 baseline.
 "$PY" -m src.leakage_probe "$TARGET"
 
+# Gate 3 featurisation: descriptors and Morgan bits from the standardised structures only,
+# cached with a manifest. Deterministic and byte-identical on a rerun; no model is fitted.
+"$PY" -m src.features "$TARGET"
+
 # Documentation guard: curation figures and sign-off tables must match this logged run.
 if [[ "$TARGET" == "CHEMBL284" ]]; then
     "$PY" scripts/check_data_card_numbers.py | tail -1

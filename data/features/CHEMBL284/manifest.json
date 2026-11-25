@@ -1,0 +1,141 @@
+{
+  "target_chembl_id": "CHEMBL284",
+  "command": ".venv/bin/python -m src.features CHEMBL284",
+  "purpose": "Gate 3 feature cache. No model is fitted, scored or selected here.",
+  "seed": 42,
+  "seed_role": "Recorded for provenance only. Featurisation draws no random numbers, so the cache is byte-identical on every rerun.",
+  "determinism": "No run timestamp is recorded, which is what lets a rerun be byte-identical. Provenance is carried by the input checksums below.",
+  "rdkit_version": "2026.09.1",
+  "numpy_version": "2.5.5",
+  "source": {
+    "curated_dir": "data/curated/CHEMBL284",
+    "structures": "canonical_smiles from compounds.csv: sanitised, largest fragment, neutralised and InChIKey-verified by Gate 2. Raw SMILES are never read.",
+    "raw_manifest_sha256": "b9dd14afd98254d9bd9efcc17b0183d513920116c10803671c752ff2b226ab15",
+    "curated_compounds_sha256": "38a146dfc20899f410bbcf5bbb889fceb9a5e9b5c163dcffe2b1d1bd99af77b6",
+    "split_audit_sha256": "76028f45ba97ce47c6634b607200684c51f2478113fbb6448ac880686ff1dec2"
+  },
+  "reconciliation": {
+    "curated_compounds": 3965,
+    "rows_featurised": 3965,
+    "featurisation_failures": 0,
+    "non_finite_descriptor_values": 0,
+    "compounds_dropped": 0
+  },
+  "row_order": "Ascending standardised full InChIKey, identical to the saved split assignment CSVs, so the cached matrices join to them positionally.",
+  "split_row_order_matches_saved_assignments": {
+    "random": true,
+    "scaffold": true
+  },
+  "descriptor_block": {
+    "count": 12,
+    "names": [
+      "MolWt",
+      "HeavyAtomCount",
+      "MolLogP",
+      "MolMR",
+      "TPSA",
+      "NumLipinskiHBD",
+      "NumLipinskiHBA",
+      "NumRotatableBonds",
+      "RingCount",
+      "NumAromaticRings",
+      "FractionCSP3",
+      "NumHeteroatoms"
+    ],
+    "shape": [
+      3965,
+      12
+    ],
+    "rationale": {
+      "MolWt": "Average molecular weight; the size term of Lipinski's rule of five.",
+      "HeavyAtomCount": "Size as an integer atom count, free of hydrogen-weight and isotope conventions.",
+      "MolLogP": "Crippen atom-contribution octanol/water logP; the lipophilicity term of the rule of five.",
+      "MolMR": "Crippen molar refractivity; polarisability and bulk, the Ghose-filter companion to logP.",
+      "TPSA": "Topological polar surface area; the polarity term of Veber's permeability rules.",
+      "NumLipinskiHBD": "Lipinski hydrogen-bond donors (N-H and O-H count), the rule-of-five donor definition.",
+      "NumLipinskiHBA": "Lipinski hydrogen-bond acceptors (nitrogen and oxygen count), the rule-of-five definition.",
+      "NumRotatableBonds": "Conformational flexibility; the Veber rotatable-bond term.",
+      "RingCount": "Number of SSSR rings; total ring content.",
+      "NumAromaticRings": "Aromatic ring count; aromatic versus saturated ring character.",
+      "FractionCSP3": "Fraction of sp3-hybridised carbons; saturation and three-dimensional character.",
+      "NumHeteroatoms": "Heteroatom count; polar functionality that TPSA alone does not separate."
+    },
+    "selection_rule": "Fixed and declared before any model is fitted. Chosen for named, monotone interpretability, not by any score.",
+    "nan_inf_policy": "Every descriptor value is checked with numpy.isfinite. A non-finite value is written to featurisation_failures.csv and aborts the run. Nothing is imputed, clipped or dropped, so no imputation statistic exists that could have been fitted on the full dataset.",
+    "scaling_policy": "None. No centring, scaling, variance filtering or feature selection is applied at Gate 3. The descriptor baseline is a tree ensemble, which is invariant to monotone per-column rescaling, so a scaler would add a fitted object with no benefit. Any transform a later gate adds must be fitted on training rows only.",
+    "statelessness": "Provably stateless: each row is a function of one molecule alone. No row, label, split or dataset-level statistic enters another row's features. test_features.py checks this by featurising single molecules in isolation.",
+    "omitted_aliphatic_ring_count": "NumAliphaticRings is deliberately omitted: RDKit partitions SSSR rings into aromatic and aliphatic, so it is exactly RingCount - NumAromaticRings. The identity is measured, not assumed; see collinearity.aliphatic_ring_identity_max_deviation."
+  },
+  "fingerprint_block": {
+    "type": "Morgan bit vector",
+    "radius": 2,
+    "fpSize": 2048,
+    "includeChirality": false,
+    "shape": [
+      3965,
+      2048
+    ],
+    "storage": "numpy.packbits along the bit axis; load_features unpacks it.",
+    "bit_length_justification": "2,048 bits is inherited unchanged from the Gate 2 similarity audit and leakage probe, so the audited near-duplicate and shared-core counts describe this model's actual input space. It was not chosen by any metric; folding_evidence records what it costs.",
+    "folding_evidence": {
+      "radius": 2,
+      "include_chirality": false,
+      "distinct_substructure_identifiers": 9309,
+      "mean_identifiers_per_compound": 52.40958385876419,
+      "by_bit_length": {
+        "1024": {
+          "occupied_bits": 1024,
+          "mean_on_bits_per_compound": 51.341235813366964,
+          "compounds_losing_at_least_one_identifier": 2523
+        },
+        "2048": {
+          "occupied_bits": 2028,
+          "mean_on_bits_per_compound": 51.78385876418663,
+          "compounds_losing_at_least_one_identifier": 1854
+        },
+        "4096": {
+          "occupied_bits": 3692,
+          "mean_on_bits_per_compound": 52.14274905422447,
+          "compounds_losing_at_least_one_identifier": 905
+        }
+      }
+    }
+  },
+  "collinearity": {
+    "train_rows_only": {
+      "random": {
+        "rows": 3172,
+        "constant_columns": [],
+        "max_abs_pearson_r": 0.9802974834518052,
+        "max_abs_pearson_pair": [
+          "HeavyAtomCount",
+          "MolWt"
+        ]
+      },
+      "scaffold": {
+        "rows": 3163,
+        "constant_columns": [],
+        "max_abs_pearson_r": 0.9819492196546782,
+        "max_abs_pearson_pair": [
+          "HeavyAtomCount",
+          "MolWt"
+        ]
+      }
+    },
+    "note": "Computed on each split's training rows only, with no label involved, and used for nothing. Reported so a Gate 4 interpretation cannot mistake two near-duplicate columns for independent evidence.",
+    "aliphatic_ring_identity_max_deviation": 0.0
+  },
+  "disclaimer": "Literature/patent-reported IC50; no efficacy, safety or suitability claim.",
+  "inputs_verified_before_and_after": true,
+  "files": {
+    "descriptors.csv": {
+      "sha256": "9d0d5d3dca2e67c896a49537becb88e62ba28e35d5372559b3b397b6581036b3"
+    },
+    "fingerprint_bits.npy": {
+      "sha256": "9f6154219cd85e3353b65231053de14aedbe8be3c232cf32c1b8cca26951945e"
+    },
+    "featurisation_failures.csv": {
+      "sha256": "723a7bab0776cbf3547226f24037efe7f6cc2ffd683205c27cb1b84c0f0cda83"
+    }
+  }
+}

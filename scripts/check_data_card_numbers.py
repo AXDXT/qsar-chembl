@@ -17,16 +17,52 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 LOG = ROOT / "results/curation/CHEMBL284/curation_log.json"
 CURATED = ROOT / "data/curated/CHEMBL284"
+FEATURES = ROOT / "data/features/CHEMBL284"
 RAW = ROOT / "data/raw/CHEMBL284"
 
 
-def signoff_table_checks(text: str, curation: dict, audit: dict, probe: dict) -> list[tuple[str, bool]]:
-    """Compare the handoff's displayed tables with the run, including rounded CIs."""
-    rows = {}
+def _table_rows(text: str) -> dict[str, list[list[str]]]:
+    """Index every Markdown table row by its first cell, keeping duplicates visible."""
+    rows: dict[str, list[list[str]]] = {}
     for line in text.splitlines():
         if line.startswith("|"):
             cells = [re.sub(r"\*\*", "", cell.strip()) for cell in line.strip("|").split("|")]
             rows.setdefault(cells[0], []).append(cells[1:])
+    return rows
+
+
+def gate3_feature_checks(text: str, features: dict) -> list[tuple[str, bool]]:
+    """Re-derive every Gate 3 featurisation figure quoted in prose from the logged cache."""
+    rows = _table_rows(text)
+    reconciliation = features["reconciliation"]
+    descriptor, fingerprint = features["descriptor_block"], features["fingerprint_block"]
+    evidence = fingerprint["folding_evidence"]
+    expected = {
+        "Curated compounds in": [f"{reconciliation['curated_compounds']:,}"],
+        "Rows featurised": [f"{reconciliation['rows_featurised']:,}"],
+        "Featurisation failures": [str(reconciliation["featurisation_failures"])],
+        "Non-finite descriptor values": [str(reconciliation["non_finite_descriptor_values"])],
+        "Compounds dropped": [str(reconciliation["compounds_dropped"])],
+        "Descriptor columns": [str(descriptor["count"])],
+        "Morgan bits (radius 2, nonchiral)": [f"{fingerprint['fpSize']:,}"],
+        "Distinct radius-≤2 substructure identifiers":
+            [f"{evidence['distinct_substructure_identifiers']:,}"],
+    }
+    for bits in ("1024", "2048", "4096"):
+        result = evidence["by_bit_length"][bits]
+        expected[f"Occupied bits at {int(bits):,}"] = [f"{result['occupied_bits']:,}"]
+        expected[f"Compounds losing ≥1 identifier at {int(bits):,}"] = [
+            f"{result['compounds_losing_at_least_one_identifier']:,}"]
+    for split, result in features["collinearity"]["train_rows_only"].items():
+        expected[f"Largest absolute r among descriptors, {split} training rows"] = [
+            f"{result['max_abs_pearson_r']:.3f} ({' / '.join(result['max_abs_pearson_pair'])})"]
+    return [(f"Gate 3 feature table: {label}", rows.get(label) == [values])
+            for label, values in expected.items()]
+
+
+def signoff_table_checks(text: str, curation: dict, audit: dict, probe: dict) -> list[tuple[str, bool]]:
+    """Compare the handoff's displayed tables with the run, including rounded CIs."""
+    rows = _table_rows(text)
     expected = {}
     labels = ("Binding assays", "IC50 only", "Human target", "Finite positive molar units to nM",
               "Exact relation only", "Standardised structures", "Median per standardised full InChIKey")
@@ -172,6 +208,9 @@ def main() -> int:
         (ROOT / "GATE2_SIGNOFF.md").read_text(), d,
         json.loads((ROOT / "results/splits/CHEMBL284/audit.json").read_text()),
         json.loads((ROOT / "results/leakage_probe/CHEMBL284/probe.json").read_text())))
+    checks.extend(gate3_feature_checks(
+        (ROOT / "DATA_CARD.md").read_text(),
+        json.loads((FEATURES / "manifest.json").read_text())))
 
     for name, ok in checks:
         print(f"{'OK  ' if ok else 'FAIL'} {name}")

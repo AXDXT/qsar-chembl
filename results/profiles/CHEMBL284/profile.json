@@ -2,7 +2,7 @@
   "target_chembl_id": "CHEMBL284",
   "chembl_db_version": "ChEMBL_37",
   "retrieval_finished_utc": "2026-11-25T06:46:36+00:00",
-  "profiled_utc": "2026-11-25T11:35:59+00:00",
+  "profiled_utc": "2026-11-25T21:49:22+00:00",
   "source_manifest_sha256": "b9dd14afd98254d9bd9efcc17b0183d513920116c10803671c752ff2b226ab15",
   "source_raw_files": {
     "activities.jsonl.gz": {

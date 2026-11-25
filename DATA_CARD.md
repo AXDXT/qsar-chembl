@@ -190,7 +190,7 @@ censoring ChEMBL *labels*, and the top concentration tested is not a field in th
 have to be read out of the assay descriptions), so a ceiling recorded without a `>` relation
 cannot be excluded. The absence of a spike is **evidence against** such a ceiling, not proof.
 
-### Measured replicate dispersion (the Gate 4 reference number)
+### Measured replicate dispersion (no Gate 4 reference figure chosen yet)
 
 From the step-7 replicate groups: 476 replicated compounds, 1,366 individual reports, 890 degrees
 of freedom. Pooled within-compound SD, in pIC50 log units and so directly comparable with a model
@@ -326,6 +326,77 @@ to `kuelumbus/rdkit-pypi`. A reader on Linux, or on conda-forge, is therefore no
 working around an RDKit defect and can relax the pin once the macOS arm64 wheel is
 rebuilt — the scaffold algorithm itself is unchanged across these versions. Verified
 against the primary source by Aadit; the local reproduction is gpt's.
+
+## Gate 3 featurisation
+
+Command: `.venv/bin/python -m src.features CHEMBL284`, run by `./run_all.sh` after the
+splits. Inputs are the checksum-verified `compounds.csv` structures and the saved split
+assignments; raw SMILES are never read, and no label is read at all. Outputs, including
+a manifest with shapes, input checksums and the RDKit version, are in
+`data/features/CHEMBL284/` with a human-readable `features.md`. **No model is fitted
+in this step.** The cache records no run timestamp, which is what lets a rerun be
+byte-identical; provenance travels in the input checksums instead.
+
+| Featurisation figure | Value |
+|---|---:|
+| Curated compounds in | 3,965 |
+| Rows featurised | 3,965 |
+| Featurisation failures | 0 |
+| Non-finite descriptor values | 0 |
+| Compounds dropped | 0 |
+| Descriptor columns | 12 |
+| Morgan bits (radius 2, nonchiral) | 2,048 |
+| Distinct radius-≤2 substructure identifiers | 9,309 |
+| Occupied bits at 1,024 | 1,024 |
+| Occupied bits at 2,048 | 2,028 |
+| Occupied bits at 4,096 | 3,692 |
+| Compounds losing ≥1 identifier at 1,024 | 2,523 |
+| Compounds losing ≥1 identifier at 2,048 | 1,854 |
+| Compounds losing ≥1 identifier at 4,096 | 905 |
+| Largest absolute r among descriptors, random training rows | 0.980 (HeavyAtomCount / MolWt) |
+| Largest absolute r among descriptors, scaffold training rows | 0.982 (HeavyAtomCount / MolWt) |
+
+- **Descriptor set (12 columns), and why these:** MolWt, HeavyAtomCount, MolLogP,
+  MolMR, TPSA, NumLipinskiHBD, NumLipinskiHBA, NumRotatableBonds, RingCount,
+  NumAromaticRings, FractionCSP3, NumHeteroatoms. The set is the Lipinski rule-of-five
+  terms plus the Veber flexibility and polarity terms, extended with size,
+  polarisability, ring and saturation counts. Every column has a name a chemist can
+  argue with, so a later interpretation can discuss it directly instead of through a
+  surrogate. No 3D descriptor is included: those require conformer generation, which
+  would add a stochastic embedding step this gate has no reason to introduce.
+  `NumAliphaticRings` is omitted because RDKit partitions SSSR rings into aromatic and
+  aliphatic, making it exactly `RingCount - NumAromaticRings`; the identity is measured
+  across all 3,965 compounds (maximum deviation 0.0), not assumed.
+- **NaN/inf:** every value is checked with `numpy.isfinite`. A non-finite value is
+  written to `featurisation_failures.csv` and **aborts the run**. Nothing is imputed,
+  clipped or dropped, so no imputation statistic exists that could have been fitted
+  across the dataset. The observed count is zero, which is a measurement, not an
+  assumption. A compound that failed to featurise would be reported, not silently lost:
+  the row count must reconcile with the 3,965 curated compounds or the run fails.
+- **Scaling and selection:** none at Gate 3. The descriptor baseline is a tree ensemble,
+  invariant to monotone per-column rescaling, so a scaler would add a fitted object with
+  no benefit. Featurisation is therefore **provably stateless** rather than train-fitted:
+  each row is a function of one standardised molecule alone, and the tests check this by
+  featurising molecules in isolation and comparing with the batch rows. Any transform a
+  later gate adds must be fitted on training rows only.
+- **Bit length, and why 2,048:** inherited unchanged from the Gate 2 similarity audit and
+  leakage probe, so the audited shared-core and Tanimoto ≥0.90 counts describe the
+  model's actual input space rather than a different representation. It was not chosen by
+  any score. The cost is measured and is not small: 9,309 distinct radius-≤2 substructure
+  identifiers fold into 2,028 occupied bits, and 1,854 of 3,965 compounds lose at least
+  one identifier to a collision. 4,096 bits would reduce that to 905. Those alternatives
+  were measured, never scored, and nothing here selects a length — **changing the bit
+  length is a Gate 4 question**, and it must be decided on a training-only criterion,
+  not by comparing held-out metrics.
+- **Collinearity:** reported on each split's training rows only, with no label involved,
+  and used for nothing — no column is dropped, combined or reweighted on the strength of
+  it. MolWt and HeavyAtomCount correlate at 0.980/0.982, so a Gate 4 interpretation must
+  not read them as two independent pieces of evidence about size.
+- **Stereochemistry:** neither block distinguishes stereoisomers. The fingerprint ignores
+  chirality by Gate 2's choice and no descriptor counts stereocentres, so two
+  stereoisomers can receive identical features and different labels. 286 curated compounds
+  share a connectivity skeleton with another compound, so this is a measured limitation
+  rather than a hypothetical one. It is a ceiling on any model built from these features.
 
 **Needs decision before sign-off:** the existing 0.310-log-unit noise figure
 conditions on replicate groups with 0.01 <= spread <=1 log unit. It describes that
