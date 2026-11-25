@@ -123,7 +123,7 @@
   "target_chembl_id": "CHEMBL284",
   "chembl_db_version": "ChEMBL_37",
   "raw_retrieval_finished_utc": "2026-11-25T06:46:36+00:00",
-  "curated_utc": "2026-11-25T11:17:22+00:00",
+  "curated_utc": "2026-11-25T11:23:20+00:00",
   "command": ".venv/bin/python -m src.curate CHEMBL284",
   "seed": 42,
   "source_raw_files": {
@@ -189,7 +189,7 @@
     }
   },
   "replicate_noise": {
-    "definition": "Dispersion between repeated IC50 measurements of the same standardised compound, in pIC50 log units, directly comparable with a model RMSE.",
+    "definition": "Dispersion between repeated IC50 reports of the same standardised compound, in pIC50 log units (the units of RMSE), not an established lower bound on compound-median prediction error.",
     "replicated_compounds": 476,
     "replicate_measurements": 1366,
     "degrees_of_freedom": 890,
@@ -199,10 +199,11 @@
       "0.3-1": 79,
       "1-2": 40,
       "2-3": 15,
-      ">3": 56
+      ">=3": 56
     },
-    "groups_numerically_identical": 222,
-    "groups_genuinely_differing": 254,
+    "groups_exactly_equal": 199,
+    "groups_spread_below_0_01": 222,
+    "groups_spread_at_least_0_01": 254,
     "pooled_within_compound_sd_all_groups": 0.8278402046109885,
     "pooled_within_compound_sd_differing_groups": 1.0107743616189764,
     "pooled_within_compound_sd_differing_under_1_log": 0.30984123494360544,
@@ -216,20 +217,21 @@
     "spread_max": 8.32221929473392,
     "compounds_flagged_spread_over_1_log": 108,
     "noise_floor": {
+      "status": "pending_human_decision; legacy recommendation and ceiling keys are descriptive candidates, not validated bounds",
       "recommended_for_gate4": 0.30984123494360544,
-      "recommended_basis": "pooled_within_compound_sd_differing_under_1_log: the pooled SD over replicate groups that actually differ (identical re-reports excluded) and that agree to within one log unit. This is the dispersion of genuinely repeated measurement of the same chemistry, and is the number a model RMSE should be compared with.",
+      "recommended_basis": "pooled_within_compound_sd_differing_under_1_log: the pooled SD over groups with 0.01 <= spread <= 1 log unit. This legacy candidate conditions on observed disagreement; it neither establishes independent repeats nor estimates a universal floor. Gate 4 use requires a human decision.",
       "ceiling_including_irreconcilable_groups": 1.0107743616189764,
-      "ceiling_basis": "pooled_within_compound_sd_differing_groups: the same quantity over every differing group, including the ones whose replicates disagree by several log units. Those are contradictory measurements rather than noise around a value, so this is a ceiling on how generous the floor could honestly be made.",
+      "ceiling_basis": "pooled_within_compound_sd_differing_groups: the same quantity over every group with spread >=0.01 log unit, including large disagreements. This is a sensitivity statistic, not a statistical upper bound on assay noise or prediction error.",
       "all_groups_figure_and_why_it_is_not_used": {
         "value": 0.8278402046109885,
-        "reason": "The pooled SD over all replicate groups mixes two populations: identical re-reports contribute zero variance and deflate it, while irreconcilable groups inflate it. It is reported for completeness and is not a defensible noise floor in either direction."
+        "reason": "The pooled SD over all repeated groups is the unfiltered descriptive dispersion. Near-equal and widely disagreeing reports both contribute. Neither independence nor assay comparability has been established, so it is not an irreducible prediction-error floor."
       }
     },
     "caveats": [
       "These are repeated literature and patent reports, not a designed replicate experiment: they mix assay protocols, so none of these figures is pure assay noise.",
-      "The spread distribution is bimodal: most groups are identical re-reports of one number, and a long tail disagrees by several log units. The mean spread (and the pooled SD over all groups) sits between the two modes and describes neither; the histogram above is the honest summary.",
-      "Only replicated compounds contribute. 3489 of 3965 curated compounds are measured once, so the floor is measured on 12.0% of the curated set.",
-      "The recommended figure is conditional dispersion for differing repeat groups with spread <=1 log unit, not an unconditional lower bound on held-out RMSE. Predictions target compound medians, not individual reports; the repeated subset may differ from the test population. A lower RMSE alone does not prove leakage or memorisation. Independence of these reports has not been established."
+      "The spread distribution has many near-equal groups and a long tail of large disagreements. Spread <0.01 does not mean exact equality or prove copying. All finite histogram bins include their lower edge and exclude their upper edge; the final bin includes 3 log units. Inspect the histogram alongside pooled SDs.",
+      "Only replicated compounds contribute. 3489 of 3965 curated compounds are measured once, so dispersion is measured on 12.0% of the curated set.",
+      "The legacy candidate is conditional dispersion for repeat groups with 0.01 <= spread <=1 log unit, not an unconditional lower bound on held-out RMSE. Predictions target compound medians, not individual reports; the repeated subset may differ from the test population. A lower RMSE alone does not prove leakage or memorisation. Independence of these reports has not been established."
     ]
   },
   "identity_decisions": {

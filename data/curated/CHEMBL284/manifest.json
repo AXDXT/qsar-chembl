@@ -1,7 +1,7 @@
 {
   "target_chembl_id": "CHEMBL284",
   "chembl_db_version": "ChEMBL_37",
-  "curated_utc": "2026-11-25T11:17:22+00:00",
+  "curated_utc": "2026-11-25T11:23:20+00:00",
   "command": ".venv/bin/python -m src.curate CHEMBL284",
   "seed": 42,
   "python": "3.13.7",

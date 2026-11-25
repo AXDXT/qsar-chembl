@@ -384,10 +384,10 @@ def summarise_compound(inchikey: str, rows: list[dict]) -> dict:
 # ------------------------------------------------------------------- measured noise floor
 
 def replicate_noise(compounds: list[dict], records: list[dict]) -> dict:
-    """Measurement noise floor for THIS dataset, in log units (RMSE-comparable).
+    """Measured repeat dispersion, in the same log units as model RMSE.
 
-    Gate 4 cites ``pooled_within_compound_sd``. Every figure below is computed from the
-    curated replicate groups, never assumed.
+    Selection is explicit; none of these statistics establishes an irreducible error
+    floor for compound-median predictions. The Gate 4 reference remains a human decision.
     """
     by_key: dict[str, list[float]] = defaultdict(list)
     for r in records:
@@ -407,32 +407,32 @@ def replicate_noise(compounds: list[dict], records: list[dict]) -> dict:
     deviations = [abs(x - statistics.median(v)) for v in replicated.values() for x in v]
     spreads = sorted(c["pIC50_spread"] for c in compounds if c["n_records"] > 1)
 
-    # The spreads are strongly bimodal, so one number cannot describe them. Groups whose
-    # replicates are numerically identical are the SAME measurement re-reported (literature
-    # row plus its BindingDB patent copy, for instance), not an independent repeat, and they
-    # carry no information about assay noise. They are separated out rather than averaged in.
-    IDENTICAL = 0.01
-    identical = {k: v for k, v in replicated.items() if max(v) - min(v) < IDENTICAL}
-    informative = {k: v for k, v in replicated.items() if max(v) - min(v) >= IDENTICAL}
+    # This threshold defines a sensitivity subset, not experimental independence.
+    # Equal or almost-equal values can be copied reports OR independent agreements.
+    NEAR_EQUAL = 0.01
+    identical = {k: v for k, v in replicated.items() if max(v) - min(v) < NEAR_EQUAL}
+    informative = {k: v for k, v in replicated.items() if max(v) - min(v) >= NEAR_EQUAL}
     tight = {k: v for k, v in informative.items() if max(v) - min(v) <= LARGE_SPREAD_LOG_UNITS}
     informative_sd, informative_df = pooled_sd(informative)
     tight_sd, tight_df = pooled_sd(tight)
 
-    edges = [0.0, IDENTICAL, 0.3, 1.0, 2.0, 3.0, float("inf")]
+    edges = [0.0, NEAR_EQUAL, 0.3, 1.0, 2.0, 3.0, float("inf")]
     histogram = {}
     for low, high in zip(edges, edges[1:]):
-        label = f"{low:g}-{high:g}" if math.isfinite(high) else f">{low:g}"
+        label = f"{low:g}-{high:g}" if math.isfinite(high) else f">={low:g}"
         histogram[label] = sum(1 for s in spreads if low <= s < high)
 
     return {
-        "definition": "Dispersion between repeated IC50 measurements of the same standardised "
-                      "compound, in pIC50 log units, directly comparable with a model RMSE.",
+        "definition": "Dispersion between repeated IC50 reports of the same standardised "
+                      "compound, in pIC50 log units (the units of RMSE), not an established "
+                      "lower bound on compound-median prediction error.",
         "replicated_compounds": len(replicated),
         "replicate_measurements": sum(len(v) for v in replicated.values()),
         "degrees_of_freedom": all_df,
         "spread_histogram_log_units": histogram,
-        "groups_numerically_identical": len(identical),
-        "groups_genuinely_differing": len(informative),
+        "groups_exactly_equal": sum(max(v) == min(v) for v in replicated.values()),
+        "groups_spread_below_0_01": len(identical),
+        "groups_spread_at_least_0_01": len(informative),
         "pooled_within_compound_sd_all_groups": all_sd,
         "pooled_within_compound_sd_differing_groups": informative_sd,
         "pooled_within_compound_sd_differing_under_1_log": tight_sd,
@@ -446,38 +446,38 @@ def replicate_noise(compounds: list[dict], records: list[dict]) -> dict:
         "spread_max": spreads[-1],
         "compounds_flagged_spread_over_1_log": sum(1 for s in spreads if s > LARGE_SPREAD_LOG_UNITS),
         "noise_floor": {
+            "status": "pending_human_decision; legacy recommendation and ceiling keys are descriptive candidates, not validated bounds",
             "recommended_for_gate4": tight_sd,
             "recommended_basis": "pooled_within_compound_sd_differing_under_1_log: the pooled SD "
-                                 "over replicate groups that actually differ (identical re-reports "
-                                 "excluded) and that agree to within one log unit. This is the "
-                                 "dispersion of genuinely repeated measurement of the same "
-                                 "chemistry, and is the number a model RMSE should be compared with.",
+                                 "over groups with 0.01 <= spread <= 1 log unit. This legacy "
+                                 "candidate conditions on observed disagreement; it neither "
+                                 "establishes independent repeats nor estimates a universal floor. "
+                                 "Gate 4 use requires a human decision.",
             "ceiling_including_irreconcilable_groups": informative_sd,
             "ceiling_basis": "pooled_within_compound_sd_differing_groups: the same quantity over "
-                             "every differing group, including the ones whose replicates disagree "
-                             "by several log units. Those are contradictory measurements rather "
-                             "than noise around a value, so this is a ceiling on how generous the "
-                             "floor could honestly be made.",
+                             "every group with spread >=0.01 log unit, including large "
+                             "disagreements. This is a sensitivity statistic, not a statistical "
+                             "upper bound on assay noise or prediction error.",
             "all_groups_figure_and_why_it_is_not_used": {
                 "value": all_sd,
-                "reason": "The pooled SD over all replicate groups mixes two populations: "
-                          "identical re-reports contribute zero variance and deflate it, while "
-                          "irreconcilable groups inflate it. It is reported for completeness and "
-                          "is not a defensible noise floor in either direction.",
+                "reason": "The pooled SD over all repeated groups is the unfiltered descriptive "
+                          "dispersion. Near-equal and widely disagreeing reports both contribute. "
+                          "Neither independence nor assay comparability has been established, "
+                          "so it is not an irreducible prediction-error floor.",
             },
         },
         "caveats": [
             "These are repeated literature and patent reports, not a designed replicate "
             "experiment: they mix assay protocols, so none of these figures is pure assay noise.",
-            "The spread distribution is bimodal: most groups are identical re-reports of one "
-            "number, and a long tail disagrees by several log units. The mean spread "
-            "(and the pooled SD over all groups) sits between the two modes and describes "
-            "neither; the histogram above is the honest summary.",
+            "The spread distribution has many near-equal groups and a long tail of large "
+            "disagreements. Spread <0.01 does not mean exact equality or prove copying. "
+            "All finite histogram bins include their lower edge and exclude their upper edge; "
+            "the final bin includes 3 log units. Inspect the histogram alongside pooled SDs.",
             f"Only replicated compounds contribute. {len(compounds) - len(replicated)} of "
-            f"{len(compounds)} curated compounds are measured once, so the floor is measured on "
+            f"{len(compounds)} curated compounds are measured once, so dispersion is measured on "
             f"{100 * len(replicated) / len(compounds):.1f}% of the curated set.",
-            "The recommended figure is conditional dispersion for differing repeat groups "
-            "with spread <=1 log unit, not an unconditional lower bound on held-out RMSE. "
+            "The legacy candidate is conditional dispersion for repeat groups "
+            "with 0.01 <= spread <=1 log unit, not an unconditional lower bound on held-out RMSE. "
             "Predictions target compound medians, not individual reports; the repeated subset "
             "may differ from the test population. A lower RMSE alone does not prove leakage "
             "or memorisation. Independence of these reports has not been established.",
@@ -838,10 +838,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{target_id}: {log['input_records']} raw records -> {len(log['records'])} curated records "
           f"-> {len(log['compounds'])} compounds")
     floor = noise["noise_floor"]
-    print(f"  noise floor: {floor['recommended_for_gate4']:.3f} log units "
-          f"(ceiling {floor['ceiling_including_irreconcilable_groups']:.3f}) from "
+    print(f"  conditional repeat SD: {floor['recommended_for_gate4']:.3f} log units "
+          f"(all groups {noise['pooled_within_compound_sd_all_groups']:.3f}; Gate 4 choice pending) from "
           f"{noise['replicated_compounds']} replicated compounds, "
-          f"{noise['groups_genuinely_differing']} of them genuinely differing")
+          f"{noise['groups_spread_at_least_0_01']} with spread >=0.01")
     print(f"  -> data/curated/{target_id}/ and results/curation/{target_id}/")
     return 0
 

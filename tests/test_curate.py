@@ -246,8 +246,8 @@ def test_empty_input_invents_no_statistics():
 
 # -------------------------------------------------------------------------- noise floor
 
-def test_noise_floor_is_measured_not_assumed():
-    # Two groups that differ by 0.3 log, one group of identical re-reports.
+def test_repeat_dispersion_is_measured_not_assumed():
+    # One group differing by 0.3 log and one equal-valued group.
     rows = ([_row(activity_id=1, standard_value="10", canonical_smiles="CCO"),
              _row(activity_id=2, standard_value="20", canonical_smiles="CCO"),
              _row(activity_id=3, standard_value="10", canonical_smiles="CCC"),
@@ -255,21 +255,20 @@ def test_noise_floor_is_measured_not_assumed():
     log = curate.run_cascade(rows)
     noise = curate.replicate_noise(log["compounds"], log["records"])
     assert noise["replicated_compounds"] == 2
-    assert noise["groups_numerically_identical"] == 1
-    assert noise["groups_genuinely_differing"] == 1
+    assert noise["groups_spread_below_0_01"] == 1
+    assert noise["groups_spread_at_least_0_01"] == 1
     # The only differing group spans log10(20/10) = 0.301, so its SD is that over sqrt(2).
     assert noise["noise_floor"]["recommended_for_gate4"] == pytest.approx(math.log10(2) / math.sqrt(2))
-    # The ceiling is the same statistic over a superset of groups, so it cannot be smaller.
+    # Both sensitivity subsets contain the same group in this example.
     assert (noise["noise_floor"]["ceiling_including_irreconcilable_groups"]
             >= noise["noise_floor"]["recommended_for_gate4"])
-    # The all-groups figure is deflated here by the identical re-reports, which is exactly
-    # why it is reported but not used as the floor.
+    # Equal-valued groups reduce the all-groups descriptive SD in this example.
     assert noise["noise_floor"]["all_groups_figure_and_why_it_is_not_used"]["value"] < (
         noise["noise_floor"]["recommended_for_gate4"])
 
 
-def test_identical_re_reports_do_not_lower_the_noise_floor():
-    """A dataset of duplicate rows must not be reported as a near-zero noise floor."""
+def test_conditional_dispersion_is_unchanged_by_additional_equal_reports():
+    """Selection changes the estimand; the conditional statistic excludes equal groups."""
     differing = [_row(activity_id=1, standard_value="10", canonical_smiles="CCO"),
                  _row(activity_id=2, standard_value="20", canonical_smiles="CCO")]
     log_small = curate.run_cascade(differing)
@@ -280,6 +279,27 @@ def test_identical_re_reports_do_not_lower_the_noise_floor():
     b = curate.replicate_noise(log_padded["compounds"], log_padded["records"])
     assert a["noise_floor"]["recommended_for_gate4"] == pytest.approx(
         b["noise_floor"]["recommended_for_gate4"])
+
+
+def test_repeat_subset_and_histogram_boundaries_do_not_claim_exact_equality():
+    widths = [0, 0.005, 0.01, 1, 3, 4]
+    records = [{"inchikey": str(i), "pIC50": value}
+               for i, width in enumerate(widths) for value in (0, width)]
+    compounds = [{"n_records": 2, "pIC50_spread": width} for width in widths]
+    noise = curate.replicate_noise(compounds, records)
+
+    assert noise["groups_exactly_equal"] == 1
+    assert noise["groups_spread_below_0_01"] == 2
+    assert noise["groups_spread_at_least_0_01"] == 4
+    assert noise["degrees_of_freedom_differing_under_1_log"] == 2
+    assert noise["spread_histogram_log_units"] == {
+        "0-0.01": 2, "0.01-0.3": 1, "0.3-1": 0, "1-2": 1, "2-3": 0, ">=3": 2,
+    }
+    assert noise["pooled_within_compound_sd_all_groups"] == pytest.approx(
+        math.sqrt(sum(w ** 2 for w in widths) / 12))
+    assert noise["noise_floor"]["recommended_for_gate4"] == pytest.approx(
+        math.sqrt((0.01 ** 2 + 1) / 4))
+    assert noise["noise_floor"]["status"].startswith("pending_human_decision")
 
 
 # ------------------------------------------------------------------- end to end on fakes

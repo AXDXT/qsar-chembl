@@ -82,9 +82,10 @@ def main() -> int:
     ck("noise dof 597 / 208",
        (n["degrees_of_freedom_differing_groups"],
         n["degrees_of_freedom_differing_under_1_log"]) == (597, 208))
-    ck("254 differing groups", n["groups_genuinely_differing"] == 254)
-    ck("222 identical groups", n["groups_numerically_identical"] == 222)
-    ck("56 groups spread >3 log units", n["spread_histogram_log_units"][">3"] == 56)
+    ck("254 groups with spread >=0.01", n["groups_spread_at_least_0_01"] == 254)
+    ck("222 groups with spread <0.01", n["groups_spread_below_0_01"] == 222)
+    ck("56 groups spread >=3 log units", n["spread_histogram_log_units"][">=3"] == 56)
+    ck("199 exactly equal groups", n["groups_exactly_equal"] == 199)
     ck("max spread 8.32", round(n["spread_max"], 2) == 8.32)
 
     # Figures quoted in the card that are computed from the files rather than read from the log.
@@ -108,6 +109,9 @@ def main() -> int:
     spread = groups["max"] - groups["min"]
     ck("146 differing groups with spread <=1 log unit",
        int(((spread >= 0.01) & (spread <= 1)).sum()) == 146)
+
+    ck("23 near-equal groups have nonzero spread", int(((spread > 0) & (spread < 0.01)).sum()) == 23)
+    ck("29 groups at 3 and 27 above 3", (int((spread == 3).sum()), int((spread > 3).sum())) == (29, 27))
 
     for name, ok in checks:
         print(f"{'OK  ' if ok else 'FAIL'} {name}")

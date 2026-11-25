@@ -184,26 +184,30 @@ RMSE:
 | Subset | Groups | d.o.f. | Pooled SD |
 |---|---:|---:|---:|
 | All repeated groups | 476 | 890 | 0.828 |
-| Groups that genuinely differ | 254 | 597 | 1.011 |
-| Differing, spread ≤ 1 log unit | 146 | 208 | **0.310** |
+| Spread ≥ 0.01 log unit | 254 | 597 | 1.011 |
+| 0.01 ≤ spread ≤ 1 log unit | 146 | 208 | **0.310** |
 
-The recommended reference is **0.310**; 1.011 is the ceiling on how generous that figure could
-honestly be made, and 0.828 is reported for completeness but is not defensible in either
-direction, because it mixes identical re-reports (zero variance) with irreconcilable groups.
-The spread distribution is bimodal: 222 groups are numerically identical re-reports and 56 differ
-by more than 3 log units (max 8.32), so the mean spread describes neither mode; the histogram in
-`curation_log.json` is the honest summary.
+The unfiltered descriptive dispersion is **0.828**. The **0.310** and **1.011** figures
+are sensitivity statistics selected by observed spread, not established lower or upper bounds
+on measurement noise or prediction error. No Gate 4 escape threshold is approved here. The
+legacy `noise_floor.recommended_for_gate4` value is retained as a candidate with explicit
+`pending_human_decision` status, not as a settled recommendation.
+
+There are 222 groups with spread below 0.01 log unit: **199** are exactly equal and **23**
+have small nonzero differences. Similar values alone do not prove copied reporting. The
+histogram's final bin contains **56** groups with spread **≥3**, comprising **29** exactly at
+3 and **27** above 3 (max 8.32). Finite bins include the lower edge and exclude the upper edge.
 
 Four caveats travel with this number, and the last one is load-bearing. These are repeated
 literature and patent reports, not a designed replicate experiment, so none of these figures is
 pure assay noise. Only replicated compounds contribute: 3,489 of 3,965 compounds are measured
-once, so the floor is measured on 12.0% of the curated set. Independence of the repeat reports has
+once, so dispersion is measured on 12.0% of the curated set. Independence of the repeat reports has
 not been established — equal reports may be copied rather than independently agreeing.
-And **0.310 is conditional dispersion for differing repeat groups with spread ≤ 1 log unit, not
+And **0.310 is conditional dispersion for groups with 0.01 ≤ spread ≤ 1 log unit, not
 an unconditional lower bound on held-out RMSE**: predictions target compound medians rather than
 individual reports, the repeated subset may differ from the test population, and a test RMSE below
 0.310 would not by itself prove leakage or memorisation. Which figure Gate 4 may cite as its
-escape clause is still open; see "Open statistical review before sign-off" at the end of this card.
+escape clause is still open; see "Needs decision before sign-off" at the end of this card.
 
 ## Gate 2 split design and structural audit
 
@@ -308,12 +312,16 @@ working around an RDKit defect and can relax the pin once the macOS arm64 wheel 
 rebuilt — the scaffold algorithm itself is unchanged across these versions. Verified
 against the primary source by Aadit; the local reproduction is gpt's.
 
-**Open statistical review before sign-off:** the existing 0.310-log-unit noise figure
-conditions on differing replicate groups with spread <=1 log unit. It describes that
+**Needs decision before sign-off:** the existing 0.310-log-unit noise figure
+conditions on replicate groups with 0.01 <= spread <=1 log unit. It describes that
 selected subset, not an unconditional measurement floor for compound-median predictions.
 Similar reported values alone do not establish independent measurements. A test RMSE
 below this figure does not by itself prove leakage: the prediction target is an aggregated
 median and the replicate subset may differ from the held-out population. The noise report's
-caveat now explicitly states that a lower RMSE alone cannot prove leakage. Its legacy
-`recommended_for_gate4` field and supporting interpretation still need review alongside
-all-group dispersion before Gate 4 can cite it as a floor.
+caveat now explicitly states that a lower RMSE alone cannot prove leakage. My recommendation
+(gpt) is to cite **0.828** as the all-reported-repeat dispersion and **0.310 / 1.011** as
+sensitivity analyses, without using any as an automatic Gate 4 escape clause. Selecting on
+spread truncates the disagreement being estimated, and the labels being predicted are medians.
+A defensible irreducible-error threshold would require independent repeat provenance, comparable
+assay conditions, and an uncertainty model for the compound medians. Aadit must approve how Gate 4
+will use these descriptive statistics; the current evidence cannot establish such a threshold.
