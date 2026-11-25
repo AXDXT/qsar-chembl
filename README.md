@@ -1,8 +1,9 @@
 # Project 19 - QSAR Bioactivity Modelling (ChEMBL)
 
-Second-year B.Tech CS (AI and ML) coursework, dataset-only. Status: **Gate 1 ready for review**
-(repository, retrieval, candidate-target counts and raw profile). No curation, featurisation, splitting or
-modelling yet - those are later gates.
+Second-year B.Tech CS (AI and ML) coursework, dataset-only. Status: **Gate 2 in progress**.
+Human DPP4 (CHEMBL284) is locked by Aadit. Offline curation and the structural split audit
+are implemented; the fixed leakage probe, notebook and final documentation remain.
+No Gate 3 baseline or Gate 4 model is implemented.
 
 This project models literature-reported bioactivity measurements. Nothing in it claims or
 implies efficacy, safety or suitability of any compound.
@@ -16,6 +17,8 @@ implies efficacy, safety or suitability of any compound.
 | `src/candidates.py` | count-only comparison of four candidate human protein targets |
 | `src/provenance.py` | saves ChEMBL's README, LICENSE, REQUIRED.ATTRIBUTION and API status to `results/licence/` |
 | `src/profile.py` | read-only raw profile, missing values and row counts per molecule ID |
+| `src/curate.py` | offline seven-step cascade, median compound pIC50, distributions and replicate dispersion |
+| `src/splits.py` | reproducible compound random/scaffold splits and exhaustive structural leakage audit; no model fitting |
 | `DATA_CARD.md` | provenance, licence, measured composition and known biases |
 | `data/raw/` | **immutable**: unmodified API responses only, each with `manifest.json` (sha256 per file) |
 | `data/curated/` | derived data (Gate 2 onwards), always regenerated from `data/raw/` by code |
@@ -27,12 +30,14 @@ implies efficacy, safety or suitability of any compound.
 
 ```bash
 .venv/bin/pip install -r requirements.txt   # Python 3.13; versions pinned from the working .venv
-./run_all.sh                 # compile, offline tests, reuse/fetch snapshots, pull/profile CHEMBL284
+./run_all.sh                 # compile, offline tests, reuse frozen DPP4, profile/curate/split
 ./run_all.sh <TARGET_ID>     # same for another ChEMBL target id
 .venv/bin/python -m pytest -q -m live       # tests that need the live API
 .venv/bin/python -m src.candidates          # live measured counts for all four candidates
 .venv/bin/python -m src.candidates CHEMBL220 CHEMBL203  # compare selected targets
 .venv/bin/python -m src.profile CHEMBL284    # offline profile of a frozen pull
+.venv/bin/python -m src.curate CHEMBL284     # offline cascade from checksum-verified raw data
+.venv/bin/python -m src.splits CHEMBL284     # offline splits from checksum-verified curated compounds
 ```
 
 Pull one target directly: `.venv/bin/python -m src.retrieve CHEMBL220`. An existing pull is never

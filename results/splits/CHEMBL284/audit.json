@@ -1,0 +1,132 @@
+{
+  "target_chembl_id": "CHEMBL284",
+  "seed": 42,
+  "command": ".venv/bin/python -m src.splits CHEMBL284",
+  "requested_test_fraction": 0.2,
+  "rdkit_version": "2026.09.1",
+  "raw_manifest_sha256": "b9dd14afd98254d9bd9efcc17b0183d513920116c10803671c752ff2b226ab15",
+  "curated_compounds_sha256": "38a146dfc20899f410bbcf5bbb889fceb9a5e9b5c163dcffe2b1d1bd99af77b6",
+  "fingerprint": {
+    "type": "Morgan bit vector",
+    "radius": 2,
+    "fpSize": 2048,
+    "includeChirality": false
+  },
+  "near_duplicate_threshold": 0.9,
+  "scaffold_backend": "RDKit native MurckoDecompose",
+  "scaffold_backend_source_sha256": "fc22413e84104bac8cc2feaeb84a204f40f1bcfc048ba229917f7fa5d45d13f4",
+  "scaffold_rule": "Exact Bemis-Murcko atom/bond scaffold without stereochemistry; all acyclic compounds share the empty scaffold. Seeded group order; greedily approach 20% test without splitting groups. Singletons follow the same allocation rule. No pIC50 used for assignment.",
+  "similarity_cluster_decision": "Deferred: exact scaffold holdout directly tests analogue-series reuse, while the exhaustive similarity audit measures what it misses. A similarity-cluster split would answer the additional question of transfer beyond a chosen fingerprint threshold, which is outside this random-versus-scaffold leakage comparison. Scaffold holdout is not claimed to guarantee low similarity; residual pairs are retained and reported.",
+  "splits": {
+    "random": {
+      "inchikey_overlap": 0,
+      "shared_scaffolds": 268,
+      "test_compounds_with_train_scaffold": 582,
+      "shared_connectivity_keys": 75,
+      "same_connectivity_cross_boundary_pairs": 108,
+      "near_duplicate_cross_boundary_pairs": 189,
+      "test_compounds_with_near_duplicate": 120,
+      "test_nearest_train_tanimoto": {
+        "min": 0.16666666666666666,
+        "median": 0.7916666666666666,
+        "p95": 1.0,
+        "max": 1.0
+      },
+      "train": {
+        "compounds": 3172,
+        "scaffolds": 1233,
+        "global_singleton_scaffolds": 751,
+        "acyclic_compounds": 14,
+        "pIC50": {
+          "min": -0.04139268515822508,
+          "p05": 4.47205984346072,
+          "median": 7.173925197299173,
+          "p95": 8.958607314841775,
+          "max": 10.096910013008056,
+          "mean": 7.046482715810933
+        }
+      },
+      "test": {
+        "compounds": 793,
+        "scaffolds": 472,
+        "global_singleton_scaffolds": 199,
+        "acyclic_compounds": 2,
+        "pIC50": {
+          "min": 2.416801226031377,
+          "p05": 4.264611759602382,
+          "median": 7.190642329788894,
+          "p95": 8.886056647693163,
+          "max": 10.0,
+          "mean": 6.96569551129258
+        }
+      },
+      "test_compounds_outside_train_pIC50_range": 0
+    },
+    "scaffold": {
+      "inchikey_overlap": 0,
+      "shared_scaffolds": 0,
+      "test_compounds_with_train_scaffold": 0,
+      "shared_connectivity_keys": 0,
+      "same_connectivity_cross_boundary_pairs": 0,
+      "near_duplicate_cross_boundary_pairs": 69,
+      "test_compounds_with_near_duplicate": 44,
+      "test_nearest_train_tanimoto": {
+        "min": 0.16666666666666666,
+        "median": 0.6835443037974683,
+        "p95": 0.9037518853695323,
+        "max": 1.0
+      },
+      "train": {
+        "compounds": 3163,
+        "scaffolds": 1096,
+        "global_singleton_scaffolds": 714,
+        "acyclic_compounds": 16,
+        "pIC50": {
+          "min": -0.04139268515822508,
+          "p05": 4.517701649280156,
+          "median": 7.1938200260161125,
+          "p95": 8.930865922555197,
+          "max": 10.096910013008056,
+          "mean": 7.06746497159518
+        }
+      },
+      "test": {
+        "compounds": 802,
+        "scaffolds": 341,
+        "global_singleton_scaffolds": 236,
+        "acyclic_compounds": 0,
+        "pIC50": {
+          "min": 3.0,
+          "p05": 4.173925197299174,
+          "median": 7.073150894111913,
+          "p95": 8.958607314841775,
+          "max": 9.920818753952375,
+          "mean": 6.883850386348805
+        }
+      },
+      "test_compounds_outside_train_pIC50_range": 0
+    }
+  },
+  "disclaimer": "Literature/patent-reported IC50; no efficacy, safety or suitability claim.",
+  "raw_verified_before_and_after": true,
+  "files": {
+    "random_assignments.csv": {
+      "sha256": "9e032efd6d85987ce7c75b4ee6ce650471fa3b986fca7a4bcaade865e37d38bb"
+    },
+    "random_near_pairs.csv": {
+      "sha256": "55317d2349c1084096923c3715da64999e7c7714a5eecda75f59960fcda4f653"
+    },
+    "random_nearest_train.csv": {
+      "sha256": "e1c7239dbf367ce32110cf2afbfc457daf958d7f40b5b0015689521a0a87daaa"
+    },
+    "scaffold_assignments.csv": {
+      "sha256": "b8320a94e9661c4fa8b0c50d36bf2bde4fa8c1aab768164d61ec6ab9c217cbbb"
+    },
+    "scaffold_near_pairs.csv": {
+      "sha256": "7fb084e6098e54c0b304034461375c72caa3a200caa40dc0ce0657d6f715cc34"
+    },
+    "scaffold_nearest_train.csv": {
+      "sha256": "a113bb4674169a83a19ba0209882f9d7402532e5d62541ff7bbf3a7a608c7e47"
+    }
+  }
+}

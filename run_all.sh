@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-command pipeline for the steps that exist so far (Gate 1 and Gate 2 curation).
+# One-command pipeline for Gate 1, Gate 2 curation and the structural split audit.
 # Usage: ./run_all.sh [TARGET_ID]      (default CHEMBL284, the locked coursework target)
 # A target that already has data/raw/<TARGET_ID>/manifest.json is NOT re-pulled:
 # data/raw is immutable. Use `python -m src.retrieve <ID> --force` to replace a pull deliberately.
@@ -43,3 +43,6 @@ fi
 # Gate 2 curation: offline, from the frozen raw pull only. Always re-runs, so the curated
 # dataset in the tree is always the output of the code in this commit.
 "$PY" -m src.curate "$TARGET"
+
+# Split only aggregated, standardised compounds; no model fitting in this step.
+"$PY" -m src.splits "$TARGET"
