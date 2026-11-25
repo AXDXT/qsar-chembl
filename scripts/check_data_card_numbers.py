@@ -70,6 +70,14 @@ def main() -> int:
        t["exact_integer_pIC50_values"]["8.0"] == 33 and t["exact_integer_pIC50_values"]["9.0"] == 23)
     ck("extremes 2 below pIC50 2, 108 below 4",
        (t["below_2_implausible"], t["below_4"]) == (2, 108))
+    ceiling = t["pathology_checks"]["assay_ceiling"]
+    ck("no ceiling spike: 6 of 359 share the densest weak value",
+       (ceiling["compounds_sharing_it"], ceiling["compounds_below_weak_cutoff"]) == (6, 359))
+    ck("densest repeated value anywhere 8.398 shared by 43",
+       (round(ceiling["largest_repeated_value_anywhere"], 3),
+        ceiling["compounds_sharing_largest_anywhere"]) == (8.398, 43))
+    ck("extremes are not blamed on solubility",
+       "past the solubility" not in t["pathology_checks"]["implausible_extremes"]["finding"])
     ck("noise 476 compounds / 1366 reports / 890 dof",
        (n["replicated_compounds"], n["replicate_measurements"],
         n["degrees_of_freedom"]) == (476, 1366, 890))

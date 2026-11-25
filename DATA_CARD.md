@@ -168,12 +168,22 @@ Pathologies checked and reported rather than trimmed: there is **no** pile-up at
 convention such as pIC50 5.0 (10 µM) or 4.0 (100 µM) — the densest 0.1-log bins all sit in the
 6.6–7.9 interior. A rounding fingerprint is visible but small: 80 of 3,965 compounds sit on an
 exact integer pIC50, concentrated at 8.0 (33) and 9.0 (23). The extremes are implausible as
-measurements: 2 compounds below pIC50 2 (IC50 above 10 mM, past the solubility of most of these
-compounds) and 108 below pIC50 4. They are **kept and flagged**, because an activity threshold is
-a modelling choice belonging to a later gate; any later gate that trims them must say so and
-re-report the count. A hard assay ceiling would show as identical values at the top concentration
-tested; the `>` rows where such a ceiling normally hides were removed at step 5 and counted there,
-so the ceiling has been taken out of the target rather than flattened into it.
+measurements: 2 compounds below pIC50 2 (IC50 above 10 mM, a concentration at which a reported
+inhibition constant does not measure binding) and 108 below pIC50 4. They are **kept and
+flagged**, because an activity threshold is a modelling choice belonging to a later gate; any
+later gate that trims them must say so and re-report the count. This pull has no solubility or
+top-concentration field, so why those rows are weak is **not diagnosed here** — they are flagged
+only.
+
+**Assay ceiling — measured, not assumed.** A hard ceiling would show as a spike of identical
+values in the weak tail, where every non-inhibitor is recorded at the top concentration tested.
+The largest repeated value below pIC50 5 is shared by **6 of 359** compounds, while the largest
+repeated value anywhere is 8.398 (4 nM), shared by **43**. The dense identical-value clusters are
+round nanomolar potencies in the interior, not a weak-tail spike, so no ceiling is visible in the
+curated target. Two limits travel with that: removing the `>` rows at step 5 takes out only the
+censoring ChEMBL *labels*, and the top concentration tested is not a field in this pull (it would
+have to be read out of the assay descriptions), so a ceiling recorded without a `>` relation
+cannot be excluded. The absence of a spike is **evidence against** such a ceiling, not proof.
 
 ### Measured replicate dispersion (the Gate 4 reference number)
 

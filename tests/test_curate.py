@@ -244,6 +244,38 @@ def test_empty_input_invents_no_statistics():
     assert curate.replicate_noise([], [])["replicated_compounds"] == 0
 
 
+# ------------------------------------------------------------------- target distribution
+
+def test_assay_ceiling_check_detects_a_planted_ceiling_spike():
+    """The ceiling check must be able to fire, not just report 'no spike' on this dataset."""
+    ceilinged = [{"pIC50_median": 4.0} for _ in range(40)]
+    spread = [{"pIC50_median": 6.0 + i / 100} for i in range(40)]
+    summary = curate.target_variable_summary(ceilinged + spread)
+    ceiling = summary["pathology_checks"]["assay_ceiling"]
+
+    assert ceiling["largest_repeated_value_below_weak_cutoff"] == 4.0
+    assert ceiling["compounds_sharing_it"] == 40
+    assert ceiling["compounds_below_weak_cutoff"] == 40
+    # The planted spike is the densest repeated value in the whole set, which is exactly the
+    # signature the real dataset does NOT show.
+    assert ceiling["largest_repeated_value_anywhere"] == 4.0
+
+
+def test_assay_ceiling_check_reports_no_spike_when_the_weak_tail_is_spread_out():
+    values = [{"pIC50_median": 3.0 + i / 50} for i in range(60)]
+    ceiling = curate.target_variable_summary(values)["pathology_checks"]["assay_ceiling"]
+    assert ceiling["compounds_sharing_it"] == 1
+    assert "not proof" in ceiling["limit_of_this_check"]
+
+
+def test_target_summary_does_not_blame_extremes_on_solubility():
+    """Solubility is not a field in this pull, so it cannot be offered as the explanation."""
+    summary = curate.target_variable_summary([{"pIC50_median": v} for v in (0.5, 6.0, 9.0)])
+    extremes = summary["pathology_checks"]["implausible_extremes"]["finding"]
+    assert "past the solubility" not in extremes
+    assert "no solubility or top-concentration field" in extremes
+
+
 # -------------------------------------------------------------------------- noise floor
 
 def test_repeat_dispersion_is_measured_not_assumed():

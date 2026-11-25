@@ -123,7 +123,7 @@
   "target_chembl_id": "CHEMBL284",
   "chembl_db_version": "ChEMBL_37",
   "raw_retrieval_finished_utc": "2026-11-25T06:46:36+00:00",
-  "curated_utc": "2026-11-25T11:23:20+00:00",
+  "curated_utc": "2026-11-25T11:26:46+00:00",
   "command": ".venv/bin/python -m src.curate CHEMBL284",
   "seed": 42,
   "source_raw_files": {
@@ -180,12 +180,20 @@
         "exact_integer_values": "80 of 3965 compounds sit on an exact integer pIC50, concentrated at 8.0 and 9.0. That is a rounding fingerprint (10 nM, 1 nM reported as round numbers), small but real."
       },
       "implausible_extremes": {
-        "finding": "min -0.041 (IC50 ~ 1.1 M), max 10.097. A pIC50 below about 2 means an IC50 above 10 mM, which is past the solubility of most of these compounds and is better read as 'inactive at the top concentration tested' than as a measurement.",
+        "finding": "min -0.041 (IC50 ~ 1.1 M), max 10.097. A pIC50 below about 2 means an IC50 above 10 mM, a concentration at which a reported inhibition constant is not a meaningful measure of binding; such rows read more plausibly as 'no inhibition up to the top concentration tested' than as a measured IC50. This pull carries no solubility or top-concentration field, so neither explanation is established here - the values are flagged, not diagnosed.",
         "compounds_below_pIC50_2": 2,
         "compounds_below_pIC50_4": 108,
         "decision": "These are kept in the curated set and flagged here rather than trimmed, because an activity threshold is a modelling choice and belongs to a later gate, not to curation. Any later gate that trims them must say so and re-report the count."
       },
-      "assay_ceiling": "A hard ceiling would appear as a cluster of identical values at the top concentration tested. Censored '>' rows, which are where such a ceiling normally hides, were removed at step 5 and counted there, so the ceiling has been taken out of the target variable rather than flattened into it."
+      "assay_ceiling": {
+        "finding": "A hard ceiling would appear as a spike of identical values in the weak tail. The largest repeated value below pIC50 5 is 4.823909, shared by 6 of 359 compounds, whereas the largest repeated value anywhere is 8.39794, shared by 43. The dense identical-value clusters sit at round nanomolar potencies in the interior, not in the weak tail, so no ceiling spike is visible in the curated target.",
+        "largest_repeated_value_below_weak_cutoff": 4.823909,
+        "compounds_sharing_it": 6,
+        "compounds_below_weak_cutoff": 359,
+        "largest_repeated_value_anywhere": 8.39794,
+        "compounds_sharing_largest_anywhere": 43,
+        "limit_of_this_check": "Declared-censored '>' rows were removed at step 5 and counted there, which takes out the censoring ChEMBL labels. This check cannot rule out a ceiling recorded WITHOUT a '>' relation, because the top concentration tested is not a field in this pull: it would have to come from the assay descriptions. The absence of a spike is evidence against such a ceiling, not proof."
+      }
     }
   },
   "replicate_noise": {

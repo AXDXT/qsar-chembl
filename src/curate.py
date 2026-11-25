@@ -495,6 +495,18 @@ def target_variable_summary(compounds: list[dict]) -> dict:
 
     at_one_dp = Counter(round(v, 1) for v in values)
     integers = Counter(v for v in values if abs(v - round(v)) < 1e-9)
+
+    # A hard assay ceiling shows up as a spike of IDENTICAL values in the weak tail (every
+    # compound that failed to inhibit gets the top tested concentration). Measure that spike
+    # instead of asserting it is absent: the largest repeated value below pIC50 5, against the
+    # largest anywhere, so the two can be compared.
+    WEAK = 5.0
+    repeated = Counter(round(v, 6) for v in values)
+    repeated_weak = Counter(round(v, 6) for v in values if v < WEAK)
+    top_weak = repeated_weak.most_common(1)[0] if repeated_weak else (None, 0)
+    top_any = repeated.most_common(1)[0] if repeated else (None, 0)
+    n_weak = sum(1 for v in values if v < WEAK)
+
     return {
         "n_compounds": n,
         "min": values[0], "p05": q(0.05), "q1": q(0.25), "median": statistics.median(values),
@@ -520,9 +532,12 @@ def target_variable_summary(compounds: list[dict]) -> dict:
             "implausible_extremes": {
                 "finding": f"min {values[0]:.3f} (IC50 ~ {10 ** -values[0]:.2g} M), "
                            f"max {values[-1]:.3f}. A pIC50 below about 2 means an IC50 above 10 mM, "
-                           "which is past the solubility of most of these compounds and is better "
-                           "read as 'inactive at the top concentration tested' than as a "
-                           "measurement.",
+                           "a concentration at which a reported inhibition constant is not a "
+                           "meaningful measure of binding; such rows read more plausibly as "
+                           "'no inhibition up to the top concentration tested' than as a "
+                           "measured IC50. This pull carries no solubility or top-concentration "
+                           "field, so neither explanation is established here - the values are "
+                           "flagged, not diagnosed.",
                 "compounds_below_pIC50_2": sum(1 for v in values if v < 2),
                 "compounds_below_pIC50_4": sum(1 for v in values if v < 4),
                 "decision": "These are kept in the curated set and flagged here rather than "
@@ -530,11 +545,27 @@ def target_variable_summary(compounds: list[dict]) -> dict:
                             "belongs to a later gate, not to curation. Any later gate that trims "
                             "them must say so and re-report the count.",
             },
-            "assay_ceiling": "A hard ceiling would appear as a cluster of identical values at the "
-                             "top concentration tested. Censored '>' rows, which are where such a "
-                             "ceiling normally hides, were removed at step 5 and counted there, so "
-                             "the ceiling has been taken out of the target variable rather than "
-                             "flattened into it.",
+            "assay_ceiling": {
+                "finding": "A hard ceiling would appear as a spike of identical values in the weak "
+                           f"tail. The largest repeated value below pIC50 {WEAK:g} is "
+                           f"{top_weak[0]}, shared by {top_weak[1]} of {n_weak} compounds, whereas "
+                           f"the largest repeated value anywhere is {top_any[0]}, shared by "
+                           f"{top_any[1]}. The dense identical-value clusters sit at round "
+                           "nanomolar potencies in the interior, not in the weak tail, so no "
+                           "ceiling spike is visible in the curated target.",
+                "largest_repeated_value_below_weak_cutoff": top_weak[0],
+                "compounds_sharing_it": top_weak[1],
+                "compounds_below_weak_cutoff": n_weak,
+                "largest_repeated_value_anywhere": top_any[0],
+                "compounds_sharing_largest_anywhere": top_any[1],
+                "limit_of_this_check": "Declared-censored '>' rows were removed at step 5 and "
+                                       "counted there, which takes out the censoring ChEMBL "
+                                       "labels. This check cannot rule out a ceiling recorded "
+                                       "WITHOUT a '>' relation, because the top concentration "
+                                       "tested is not a field in this pull: it would have to come "
+                                       "from the assay descriptions. The absence of a spike is "
+                                       "evidence against such a ceiling, not proof.",
+            },
         },
     }
 
