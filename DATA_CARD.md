@@ -1,13 +1,14 @@
 # Data card - ChEMBL bioactivity for one protein target
 
-Status: **Gate 2 in progress; human DPP4 (CHEMBL284) locked by Aadit.**
+Status: **Gate 2 technical review complete; awaiting Aadit's noise-reference decision.**
+Human DPP4 (CHEMBL284) remains locked. The review handoff is [GATE2_SIGNOFF.md](GATE2_SIGNOFF.md).
 The Gate 1 sections below describe the frozen raw pull. The Gate 2 split decisions are
 recorded at the end with the fixed leakage probe. The executed walkthrough is
 `notebooks/gate2_dpp4_curation_and_leakage.ipynb` (rerun with
 `.venv/bin/python scripts/run_gate2_notebook.py`). The Gate 2 curation cascade, its
 judgement calls, the target variable and the measured replicate dispersion are recorded
 below under "Gate 2 curation cascade"; the split design and the fixed leakage probe follow
-it. The noise-reference choice for Gate 4 and the room sign-off remain.
+it. Final human sign-off remains pending; no later-gate work is authorised by this review.
 
 This dataset is literature-reported bioactivity measurements. It does not establish, and this
 project does not claim, the efficacy, safety or suitability of any compound.
@@ -130,15 +131,19 @@ largest fragment for 855 salt or mixture rows and neutralised 2 charged structur
   "not exactly `=`", while this cascade removes them one step earlier at step 4, because a row
   with no value cannot become a pIC50 whatever its relation says. The 4,859 rows that survive the
   relation rule are identical in both gates (`censoring_reconciliation` in `curation_log.json`,
-  asserted by two tests). A `>` row states only that the IC50 exceeds the top concentration
-  tested; keeping it as a value would put an invented number into the target.
+  asserted by two tests). A `>` row states only that the IC50 exceeds the recorded threshold;
+  keeping that threshold as an exact value would put an invented number into the target.
 - **Compound identity is the standardised InChIKey, not the ChEMBL molecule ID.** ChEMBL
   separates a salt from its parent, so keying on molecule ID would enter the same chemistry
   twice and could place the two copies on opposite sides of a split. Observed: 4,000 distinct
   molecule IDs and 3,965 parent IDs in the curated records; 32 compounds merge more than one
-  molecule ID, absorbing 35 IDs. Molecule and parent IDs are kept as audit columns. Stereoisomers
-  and tautomers keep distinct full InChIKeys (286 pairs share a skeleton), so they stay separate
-  compounds — a defensible choice to disagree with, and the skeleton counts are logged for it.
+  molecule ID, absorbing 35 IDs. Molecule and parent IDs are kept as audit columns. Structures
+  with different full keys stay separate. There are 224 groups sharing the first InChIKey
+  connectivity block, containing 286 compounds beyond the first per group and 382 unordered
+  pairs. The old log key `stereoisomer_or_tautomer_pairs_sharing_a_skeleton` holds the **286
+  additional-compound count**, despite its name; explicit new fields disambiguate it. A shared
+  first block alone does not identify the reason full keys differ, so these are not diagnosed
+  as tautomers or stereoisomers. The connectivity audit reports the split consequences.
 - **The one molecule with 96 raw rows is CHEMBL1422.** 63 of its rows survive to step 7 (the rest
   are other endpoints: Inhibition, Kd, kinetics, or censored). Merged with three further ChEMBL
   IDs for the same standardised structure, it becomes **one** compound with 71 accepted records,
@@ -167,13 +172,13 @@ Distribution figure: `results/curation/CHEMBL284/pic50_distribution.png`.
 Pathologies checked and reported rather than trimmed: there is **no** pile-up at a reporting
 convention such as pIC50 5.0 (10 µM) or 4.0 (100 µM) — the densest 0.1-log bins all sit in the
 6.6–7.9 interior. A rounding fingerprint is visible but small: 80 of 3,965 compounds sit on an
-exact integer pIC50, concentrated at 8.0 (33) and 9.0 (23). The extremes are implausible as
-measurements: 2 compounds below pIC50 2 (IC50 above 10 mM, a concentration at which a reported
-inhibition constant does not measure binding) and 108 below pIC50 4. They are **kept and
+exact integer pIC50, concentrated at 8.0 (33) and 9.0 (23). Unusually weak values warrant source
+review: 2 compounds below pIC50 2 (IC50 above 10 mM) and 108 below pIC50 4. They are **kept and
 flagged**, because an activity threshold is a modelling choice belonging to a later gate; any
 later gate that trims them must say so and re-report the count. This pull has no solubility or
 top-concentration field, so why those rows are weak is **not diagnosed here** — they are flagged
-only.
+only. The pull cannot establish whether these are measured IC50s, unlabelled censoring or
+reporting errors; unusually high concentration alone does not settle that question.
 
 **Assay ceiling — measured, not assumed.** A hard ceiling would show as a spike of identical
 values in the weak tail, where every non-inhibitor is recorded at the top concentration tested.

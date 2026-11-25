@@ -50,7 +50,7 @@ fi
 # Gate 2 only: one fixed, untuned memorisation probe, never a Gate 3 baseline.
 "$PY" -m src.leakage_probe "$TARGET"
 
-# Documentation guard: every figure quoted in DATA_CARD.md must match this logged run.
+# Documentation guard: curation figures and sign-off tables must match this logged run.
 if [[ "$TARGET" == "CHEMBL284" ]]; then
     "$PY" scripts/check_data_card_numbers.py | tail -1
 fi

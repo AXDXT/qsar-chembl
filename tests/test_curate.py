@@ -211,6 +211,18 @@ def test_stereoisomers_are_kept_apart_by_the_duplicate_rule():
     assert curate.identity_decisions(log)["stereoisomer_or_tautomer_pairs_sharing_a_skeleton"] == 1
 
 
+def test_connectivity_group_counts_distinguish_compounds_from_pairs():
+    # Two defined enantiomers and one unspecified structure share one first key block.
+    rows = [_row(activity_id=i, canonical_smiles=smiles) for i, smiles in enumerate(
+        ("C[C@H](N)C(=O)O", "C[C@@H](N)C(=O)O", "CC(N)C(=O)O"))]
+    log = curate.run_cascade(rows)
+    assert len(log["compounds"]) == 3
+    identity = curate.identity_decisions(log)
+    assert identity["connectivity_key_groups_with_multiple_compounds"] == 1
+    assert identity["additional_compounds_sharing_connectivity_key"] == 2
+    assert identity["compound_pairs_sharing_connectivity_key"] == 3
+
+
 # ------------------------------------------------------------------------ cascade shape
 
 def test_each_filter_is_a_separate_step_in_the_required_order():
@@ -274,6 +286,8 @@ def test_target_summary_does_not_blame_extremes_on_solubility():
     extremes = summary["pathology_checks"]["implausible_extremes"]["finding"]
     assert "past the solubility" not in extremes
     assert "no solubility or top-concentration field" in extremes
+    assert "not a meaningful measure of binding" not in extremes
+    assert "cannot establish whether" in extremes
 
 
 # -------------------------------------------------------------------------- noise floor

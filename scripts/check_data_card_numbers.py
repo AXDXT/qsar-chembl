@@ -1,13 +1,14 @@
-"""Re-check every figure quoted in the DATA_CARD Gate 2 curation section against the logs.
+"""Check DATA_CARD curation figures and the Gate 2 sign-off tables against the logs.
 
 Usage (repo root): .venv/bin/python scripts/check_data_card_numbers.py
 Reads the logged curation run, the curated CSVs and the frozen raw activities; exits
-nonzero on any mismatch. This is a documentation guard: it fails if the data card and
-the logged run ever disagree. It writes nothing.
+nonzero on any mismatch. Curation checks use the documented constants; sign-off table
+checks read the Markdown and compare its cells directly with the logs. It writes nothing.
 """
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -17,6 +18,44 @@ ROOT = Path(__file__).resolve().parents[1]
 LOG = ROOT / "results/curation/CHEMBL284/curation_log.json"
 CURATED = ROOT / "data/curated/CHEMBL284"
 RAW = ROOT / "data/raw/CHEMBL284"
+
+
+def signoff_table_checks(text: str, curation: dict, audit: dict, probe: dict) -> list[tuple[str, bool]]:
+    """Compare the handoff's displayed tables with the run, including rounded CIs."""
+    rows = {}
+    for line in text.splitlines():
+        if line.startswith("|"):
+            cells = [re.sub(r"\*\*", "", cell.strip()) for cell in line.strip("|").split("|")]
+            rows.setdefault(cells[0], []).append(cells[1:])
+    expected = {}
+    labels = ("Binding assays", "IC50 only", "Human target", "Finite positive molar units to nM",
+              "Exact relation only", "Standardised structures", "Median per standardised full InChIKey")
+    for label, step in zip(labels, curation["steps"], strict=True):
+        values = [f"{step[key]:,}" for key in ("records_in", "records_out", "records_removed")]
+        if label == labels[-1]:
+            values = [values[0] + " records", values[1] + " compounds", values[2] + " rows collapsed"]
+        expected[label] = values
+    for label, field in (("Train / test compounds", "compounds"),
+                         ("Train / test exact scaffolds", "scaffolds")):
+        expected[label] = [f"{audit['splits'][split]['train'][field]:,} / "
+                           f"{audit['splits'][split]['test'][field]:,}"
+                           for split in ("random", "scaffold")]
+    for label, field in (("Full InChIKey overlap, asserted zero", "inchikey_overlap"),
+                         ("Shared exact scaffolds", "shared_scaffolds"),
+                         ("Test compounds with Tanimoto ≥0.90 training neighbour", "test_compounds_with_near_duplicate")):
+        expected[label] = [str(audit["splits"][split][field]) for split in ("random", "scaffold")]
+    for label, metric in (("RMSE (95% descriptive interval), log units", "rmse"),
+                          ("MAE (95% descriptive interval), log units", "mae"),
+                          ("R² (95% descriptive interval)", "r2")):
+        values = []
+        for split in ("random", "scaffold"):
+            result = probe["splits"][split]
+            low, high = result["bootstrap"]["metrics"][metric]["ci95"]
+            values.append(f"{result['metrics'][metric]:.3f} [{low:.3f}, {high:.3f}]")
+        expected[label] = values
+    # One row per label: missing and duplicate rows fail as well as wrong numbers.
+    return [(f"sign-off table: {label}", rows.get(label) == [values])
+            for label, values in expected.items()]
 
 
 def main() -> int:
@@ -50,8 +89,12 @@ def main() -> int:
     ck("32 merged compounds absorbing 35 ids",
        (i["compounds_merging_more_than_one_molecule_id"],
         i["molecule_ids_absorbed_by_merging"]) == (32, 35))
-    ck("286 skeleton-sharing pairs",
-       i["stereoisomer_or_tautomer_pairs_sharing_a_skeleton"] == 286)
+    ck("286 additional compounds within shared connectivity groups",
+       i["additional_compounds_sharing_connectivity_key"] == 286
+       and i["stereoisomer_or_tautomer_pairs_sharing_a_skeleton"] == 286)
+    ck("224 shared connectivity groups and 382 unordered pairs",
+       (i["connectivity_key_groups_with_multiple_compounds"],
+        i["compound_pairs_sharing_connectivity_key"]) == (224, 382))
     ck("src rows 4333 / 522", sorted(i["rows_by_src_id"].items()) == [("1", 4333), ("37", 522)])
     ck("validity comments 133 / 53",
        i["data_validity_comments"]["Outside typical range"] == 133
@@ -103,6 +146,10 @@ def main() -> int:
 
     compounds = pd.read_csv(CURATED / "compounds.csv")
     records = pd.read_csv(CURATED / "records_curated.csv")
+    connectivity_counts = compounds.groupby("inchikey_skeleton").size()
+    ck("connectivity group counts independently match curated CSV",
+       (int((connectivity_counts > 1).sum()), int((connectivity_counts - 1).sum()),
+        int((connectivity_counts * (connectivity_counts - 1) // 2).sum())) == (224, 286, 382))
     busiest_id, raw_rows = Counter(
         row["molecule_chembl_id"] for row in read_jsonl_gz(RAW / "activities.jsonl.gz")
     ).most_common(1)[0]
@@ -121,10 +168,15 @@ def main() -> int:
     ck("23 near-equal groups have nonzero spread", int(((spread > 0) & (spread < 0.01)).sum()) == 23)
     ck("29 groups at 3 and 27 above 3", (int((spread == 3).sum()), int((spread > 3).sum())) == (29, 27))
 
+    checks.extend(signoff_table_checks(
+        (ROOT / "GATE2_SIGNOFF.md").read_text(), d,
+        json.loads((ROOT / "results/splits/CHEMBL284/audit.json").read_text()),
+        json.loads((ROOT / "results/leakage_probe/CHEMBL284/probe.json").read_text())))
+
     for name, ok in checks:
         print(f"{'OK  ' if ok else 'FAIL'} {name}")
     failed = [name for name, ok in checks if not ok]
-    print(f"{len(checks) - len(failed)}/{len(checks)} data-card figures match the logged run")
+    print(f"{len(checks) - len(failed)}/{len(checks)} data-card and sign-off checks match the logged run")
     return 1 if failed else 0
 
 

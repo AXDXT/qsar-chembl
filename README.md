@@ -1,9 +1,10 @@
 # Project 19 - QSAR Bioactivity Modelling (ChEMBL)
 
-Second-year B.Tech CS (AI and ML) coursework, dataset-only. Status: **Gate 2 in progress**.
+Second-year B.Tech CS (AI and ML) coursework, dataset-only. Status: **Gate 2 awaiting human sign-off**.
 Human DPP4 (CHEMBL284) is locked by Aadit. Offline curation, the structural split audit
 and the fixed leakage probe are implemented, with an executable visual notebook.
-Final curation documentation, noise-reference review and sign-off remain.
+Technical review and curation documentation are complete. Aadit's noise-reference decision
+and final approval remain; see [the Gate 2 handoff](GATE2_SIGNOFF.md).
 No Gate 3 baseline or Gate 4 model is implemented.
 
 This project models literature-reported bioactivity measurements. Nothing in it claims or
@@ -27,7 +28,7 @@ implies efficacy, safety or suitability of any compound.
 | `results/` | logged outputs: counts, profiles, figures |
 | `notebooks/gate2_dpp4_curation_and_leakage.ipynb` | executed offline visual walkthrough; reruns the production modules from frozen raw data in temporary output directories |
 | `scripts/run_gate2_notebook.py` | executes all notebook cells without a server/kernel listener and saves verified outputs |
-| `scripts/check_data_card_numbers.py` | fails if any figure quoted in `DATA_CARD.md` disagrees with the logged curation run |
+| `scripts/check_data_card_numbers.py` | checks documented curation figures and compares both `GATE2_SIGNOFF.md` tables directly with logged results |
 | `tests/` | offline by default; `-m live` runs the tests that hit the ChEMBL API |
 
 ## Setup and run
@@ -44,7 +45,7 @@ implies efficacy, safety or suitability of any compound.
 .venv/bin/python -m src.splits CHEMBL284     # offline splits from checksum-verified curated compounds
 .venv/bin/python -m src.leakage_probe CHEMBL284  # fixed probe on both saved splits, no tuning
 .venv/bin/python scripts/run_gate2_notebook.py  # execute/save the visual walkthrough offline
-.venv/bin/python scripts/check_data_card_numbers.py  # every DATA_CARD figure vs the logged run
+.venv/bin/python scripts/check_data_card_numbers.py  # curation figures and sign-off tables vs logs
 ```
 
 The Gate 2 notebook can also be opened in Jupyter with the repo's `.venv` Python

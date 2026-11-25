@@ -532,12 +532,10 @@ def target_variable_summary(compounds: list[dict]) -> dict:
             "implausible_extremes": {
                 "finding": f"min {values[0]:.3f} (IC50 ~ {10 ** -values[0]:.2g} M), "
                            f"max {values[-1]:.3f}. A pIC50 below about 2 means an IC50 above 10 mM, "
-                           "a concentration at which a reported inhibition constant is not a "
-                           "meaningful measure of binding; such rows read more plausibly as "
-                           "'no inhibition up to the top concentration tested' than as a "
-                           "measured IC50. This pull carries no solubility or top-concentration "
-                           "field, so neither explanation is established here - the values are "
-                           "flagged, not diagnosed.",
+                           "an unusually high concentration flagged for source review. This pull "
+                           "carries no solubility or top-concentration field, so it cannot "
+                           "establish whether these values are measured IC50s, unlabelled "
+                           "censoring, or reporting errors. The values are flagged, not diagnosed.",
                 "compounds_below_pIC50_2": sum(1 for v in values if v < 2),
                 "compounds_below_pIC50_4": sum(1 for v in values if v < 4),
                 "decision": "These are kept in the curated set and flagged here rather than "
@@ -831,6 +829,12 @@ def identity_decisions(log: dict) -> dict:
         "compounds_merging_more_than_one_molecule_id": len(merged),
         "molecule_ids_absorbed_by_merging": sum(c["n_molecule_chembl_ids"] - 1 for c in merged),
         "stereoisomer_or_tautomer_pairs_sharing_a_skeleton": sum(n - 1 for n in skeletons.values() if n > 1),
+        "legacy_skeleton_count_note": "The preceding legacy key counts additional compounds "
+                                      "beyond the first within each connectivity-key group, "
+                                      "not unordered pairs or identified stereoisomers/tautomers.",
+        "additional_compounds_sharing_connectivity_key": sum(n - 1 for n in skeletons.values()),
+        "connectivity_key_groups_with_multiple_compounds": sum(n > 1 for n in skeletons.values()),
+        "compound_pairs_sharing_connectivity_key": sum(n * (n - 1) // 2 for n in skeletons.values()),
         "distinct_inchikey_skeletons": len(skeletons),
         "busiest_compound": {
             "inchikey": busiest["inchikey"], "molecule_chembl_ids": busiest["molecule_chembl_ids"],

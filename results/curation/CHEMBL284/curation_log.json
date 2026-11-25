@@ -123,7 +123,7 @@
   "target_chembl_id": "CHEMBL284",
   "chembl_db_version": "ChEMBL_37",
   "raw_retrieval_finished_utc": "2026-11-25T06:46:36+00:00",
-  "curated_utc": "2026-11-25T11:26:46+00:00",
+  "curated_utc": "2026-11-25T11:36:02+00:00",
   "command": ".venv/bin/python -m src.curate CHEMBL284",
   "seed": 42,
   "source_raw_files": {
@@ -180,7 +180,7 @@
         "exact_integer_values": "80 of 3965 compounds sit on an exact integer pIC50, concentrated at 8.0 and 9.0. That is a rounding fingerprint (10 nM, 1 nM reported as round numbers), small but real."
       },
       "implausible_extremes": {
-        "finding": "min -0.041 (IC50 ~ 1.1 M), max 10.097. A pIC50 below about 2 means an IC50 above 10 mM, a concentration at which a reported inhibition constant is not a meaningful measure of binding; such rows read more plausibly as 'no inhibition up to the top concentration tested' than as a measured IC50. This pull carries no solubility or top-concentration field, so neither explanation is established here - the values are flagged, not diagnosed.",
+        "finding": "min -0.041 (IC50 ~ 1.1 M), max 10.097. A pIC50 below about 2 means an IC50 above 10 mM, an unusually high concentration flagged for source review. This pull carries no solubility or top-concentration field, so it cannot establish whether these values are measured IC50s, unlabelled censoring, or reporting errors. The values are flagged, not diagnosed.",
         "compounds_below_pIC50_2": 2,
         "compounds_below_pIC50_4": 108,
         "decision": "These are kept in the curated set and flagged here rather than trimmed, because an activity threshold is a modelling choice and belongs to a later gate, not to curation. Any later gate that trims them must say so and re-report the count."
@@ -251,6 +251,10 @@
     "compounds_merging_more_than_one_molecule_id": 32,
     "molecule_ids_absorbed_by_merging": 35,
     "stereoisomer_or_tautomer_pairs_sharing_a_skeleton": 286,
+    "legacy_skeleton_count_note": "The preceding legacy key counts additional compounds beyond the first within each connectivity-key group, not unordered pairs or identified stereoisomers/tautomers.",
+    "additional_compounds_sharing_connectivity_key": 286,
+    "connectivity_key_groups_with_multiple_compounds": 224,
+    "compound_pairs_sharing_connectivity_key": 382,
     "distinct_inchikey_skeletons": 3679,
     "busiest_compound": {
       "inchikey": "MFFMDFFZMYYVKS-SECBINFHSA-N",
