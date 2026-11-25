@@ -476,8 +476,11 @@ def replicate_noise(compounds: list[dict], records: list[dict]) -> dict:
             f"Only replicated compounds contribute. {len(compounds) - len(replicated)} of "
             f"{len(compounds)} curated compounds are measured once, so the floor is measured on "
             f"{100 * len(replicated) / len(compounds):.1f}% of the curated set.",
-            "A model RMSE below the recommended floor on a held-out set would indicate leakage "
-            "or memorisation, not accuracy.",
+            "The recommended figure is conditional dispersion for differing repeat groups "
+            "with spread <=1 log unit, not an unconditional lower bound on held-out RMSE. "
+            "Predictions target compound medians, not individual reports; the repeated subset "
+            "may differ from the test population. A lower RMSE alone does not prove leakage "
+            "or memorisation. Independence of these reports has not been established.",
         ],
     }
 

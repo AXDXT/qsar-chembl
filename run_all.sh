@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-command pipeline for Gate 1, Gate 2 curation and the structural split audit.
+# One-command pipeline for Gate 1 and Gate 2 curation, split audit and leakage probe.
 # Usage: ./run_all.sh [TARGET_ID]      (default CHEMBL284, the locked coursework target)
 # A target that already has data/raw/<TARGET_ID>/manifest.json is NOT re-pulled:
 # data/raw is immutable. Use `python -m src.retrieve <ID> --force` to replace a pull deliberately.
@@ -46,3 +46,6 @@ fi
 
 # Split only aggregated, standardised compounds; no model fitting in this step.
 "$PY" -m src.splits "$TARGET"
+
+# Gate 2 only: one fixed, untuned memorisation probe, never a Gate 3 baseline.
+"$PY" -m src.leakage_probe "$TARGET"

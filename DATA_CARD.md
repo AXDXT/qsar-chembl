@@ -2,7 +2,8 @@
 
 Status: **Gate 2 in progress; human DPP4 (CHEMBL284) locked by Aadit.**
 The Gate 1 sections below describe the frozen raw pull. The Gate 2 split decisions are
-recorded at the end; the complete curation narrative, leakage probe and sign-off remain.
+recorded at the end with the fixed leakage probe; the complete curation narrative,
+notebook and sign-off remain.
 
 This dataset is literature-reported bioactivity measurements. It does not establish, and this
 project does not claim, the efficacy, safety or suitability of any compound.
@@ -129,8 +130,52 @@ unseen exact cores, with this residual similarity limitation.
 
 The saved audit includes sizes, core counts, singleton handling, target quantiles and
 test compounds outside the training pIC50 range. These diagnose distribution shift;
-they never determine assignments. The fixed leakage probe and uncertainty remain to be
-implemented, so no score gap is claimed yet.
+they never determine assignments.
+
+### Fixed leakage probe, not a baseline
+
+Command: `.venv/bin/python -m src.leakage_probe CHEMBL284`, also run by `./run_all.sh`.
+The only fitted model is a fixed Tanimoto 1-nearest-neighbour probe on the same
+nonchiral Morgan radius-2, 2048-bit fingerprints used by the structural audit.
+Fitting stores training compound-median labels; predictions average the labels of
+all neighbours tied at maximum similarity. No tuning, split retries, activity-based
+feature selection or replicate weighting occurs. Saved assignment checksums,
+structures, labels and deterministic allocation are verified before prediction;
+zero InChIKey overlap and scaffold isolation are asserted again.
+
+| Metric (95% descriptive interval) | Random | Scaffold |
+|---|---:|---:|
+| RMSE, log units | 0.970 [0.857, 1.088] | 1.129 [0.950, 1.308] |
+| MAE, log units | 0.618 [0.558, 0.677] | 0.777 [0.654, 0.919] |
+| R2 | 0.505 [0.381, 0.610] | 0.390 [0.105, 0.585] |
+
+Intervals use 2,000 seed-42 bootstrap draws of whole held-out exact scaffold groups
+(472 random / 341 scaffold), preserving compounds within groups. They condition on
+these fixed training sets, predictions and splits. They do not include variability
+from retraining or different split seeds; similarity across distinct cores can still
+couple bootstrap groups. Intervals overlap and are not a significance test of the gap.
+Full precision, input/output hashes, subgroup metrics and predictions are in
+`results/leakage_probe/CHEMBL284/`.
+
+The observed RMSE increase is **0.159 log units**. Under random allocation, the probe
+can reuse a training core for 582/793 test compounds and a >=0.90-similarity neighbour
+for 120/793. The largest five exact-core groups contain 133, 66, 60, 52 and 40
+compounds; random places 26, 16, 10, 4 and 7 of them respectively in test, leaving
+members of all five groups in training. This is the actual analogue-series reuse
+that exact-identity checks alone miss. Random-test RMSE is 0.921 with a training
+core versus 1.093 without one, and 0.819 with a close neighbour versus 0.994 without.
+These diagnostic subsets differ in chemistry and are not controlled comparisons.
+
+Scaffold allocation removes shared exact cores and shared connectivity keys but
+retains 44 close-neighbour test compounds. Their RMSE is 1.161 versus 1.127 for the
+other 758: closeness does not guarantee assay agreement. The overall gap is consistent
+with easier series interpolation under random allocation, but also includes changed
+chemistry and target distributions; it is not an isolated causal leakage penalty.
+Over-reported compounds have already been collapsed to one median per standardised
+InChIKey, so the probe cannot memorise duplicate rows across a boundary. The 723
+random / 689 scaffold training-side repeat rows collapsed during curation carry no
+extra fitting weight. This gate demonstrates evaluation sensitivity, not a model
+selection result, and makes no efficacy, safety or suitability claim.
 
 **RDKit pin decision:** use 2026.9.1. The 2026.9.2 macOS arm64 PyPI wheel raises
 `RuntimeError: bad any cast` in native `MurckoDecompose` even for benzene, reproduced
@@ -139,10 +184,21 @@ The preceding wheel runs the native implementation. After changing the pin, the 
 offline suite and pipeline pass, and both curated CSVs remain byte-identical to the
 committed curation. No private reference algorithm is substituted for native Murcko.
 
+This pin exists because of a **platform-specific packaging fault, not a bug in RDKit's
+source**. On the issue thread the same machine works on the 2026.9.1 wheel and on the
+conda-forge 2026.9.2 build, and Linux 2026.9.2 wheels are unaffected; a maintainer
+suggested the PyPI builds may have switched to nanobind, and the report was redirected
+to `kuelumbus/rdkit-pypi`. A reader on Linux, or on conda-forge, is therefore not
+working around an RDKit defect and can relax the pin once the macOS arm64 wheel is
+rebuilt — the scaffold algorithm itself is unchanged across these versions. Verified
+against the primary source by Aadit; the local reproduction is gpt's.
+
 **Open statistical review before sign-off:** the existing 0.310-log-unit noise figure
 conditions on differing replicate groups with spread <=1 log unit. It describes that
 selected subset, not an unconditional measurement floor for compound-median predictions.
 Similar reported values alone do not establish independent measurements. A test RMSE
 below this figure does not by itself prove leakage: the prediction target is an aggregated
 median and the replicate subset may differ from the held-out population. The noise report's
-stronger claims need review alongside its all-group dispersion before Gate 4 can cite it.
+caveat now explicitly states that a lower RMSE alone cannot prove leakage. Its legacy
+`recommended_for_gate4` field and supporting interpretation still need review alongside
+all-group dispersion before Gate 4 can cite it as a floor.

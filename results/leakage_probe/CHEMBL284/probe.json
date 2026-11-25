@@ -1,0 +1,202 @@
+{
+  "target_chembl_id": "CHEMBL284",
+  "command": ".venv/bin/python -m src.leakage_probe CHEMBL284",
+  "purpose": "Gate 2 leakage demonstration only; not a Gate 3 baseline or selected model",
+  "probe": {
+    "name": "Fixed Tanimoto 1-nearest-neighbour leakage probe (not a baseline)",
+    "fingerprint": {
+      "type": "Morgan bit vector",
+      "radius": 2,
+      "fpSize": 2048,
+      "includeChirality": false
+    },
+    "prediction": "Training pIC50_median at maximum Tanimoto; average all exact maximum ties",
+    "fit": "Store training fingerprints and compound-median labels only; no tuning"
+  },
+  "seed": 42,
+  "rdkit_version": "2026.09.1",
+  "raw_manifest_sha256": "b9dd14afd98254d9bd9efcc17b0183d513920116c10803671c752ff2b226ab15",
+  "curated_compounds_sha256": "38a146dfc20899f410bbcf5bbb889fceb9a5e9b5c163dcffe2b1d1bd99af77b6",
+  "split_audit_sha256": "76028f45ba97ce47c6634b607200684c51f2478113fbb6448ac880686ff1dec2",
+  "uncertainty": "95% percentile bootstrap, 2000 resamples of whole test exact-scaffold groups, compound-weighted metrics; fixed training set, split and predictions. Not uncertainty across split seeds or retraining. Cross-core similarity can still couple groups. Intervals are descriptive, not a significance test of the gap.",
+  "splits": {
+    "random": {
+      "train_compounds": 3172,
+      "test_compounds": 793,
+      "metrics": {
+        "rmse": 0.9696823551150069,
+        "mae": 0.6182355136260219,
+        "r2": 0.5050116272661049
+      },
+      "bootstrap": {
+        "scaffold_groups": 472,
+        "draws": 2000,
+        "seed": 42,
+        "metrics": {
+          "rmse": {
+            "ci95": [
+              0.8568950241246488,
+              1.0876488510301834
+            ],
+            "valid_draws": 2000
+          },
+          "mae": {
+            "ci95": [
+              0.5579252138894378,
+              0.6769017386432961
+            ],
+            "valid_draws": 2000
+          },
+          "r2": {
+            "ci95": [
+              0.3812399148650706,
+              0.6099584553566655
+            ],
+            "valid_draws": 2000
+          }
+        }
+      },
+      "strata": {
+        "shared_train_scaffold=True": {
+          "compounds": 582,
+          "metrics": {
+            "rmse": 0.9210458980769217,
+            "mae": 0.598303458332019,
+            "r2": 0.5446280169670767
+          }
+        },
+        "shared_train_scaffold=False": {
+          "compounds": 211,
+          "metrics": {
+            "rmse": 1.09267193010763,
+            "mae": 0.6732139789393382,
+            "r2": 0.3960393413964789
+          }
+        },
+        "near_train_neighbour=True": {
+          "compounds": 120,
+          "metrics": {
+            "rmse": 0.8185156802419634,
+            "mae": 0.5646711038646122,
+            "r2": 0.6816806693088491
+          }
+        },
+        "near_train_neighbour=False": {
+          "compounds": 673,
+          "metrics": {
+            "rmse": 0.9942247485788424,
+            "mae": 0.6277863742075512,
+            "r2": 0.4691044405993666
+          }
+        }
+      },
+      "training_replicate_rows_collapsed": 723
+    },
+    "scaffold": {
+      "train_compounds": 3163,
+      "test_compounds": 802,
+      "metrics": {
+        "rmse": 1.1291051790026723,
+        "mae": 0.7772890637420996,
+        "r2": 0.39029975611075785
+      },
+      "bootstrap": {
+        "scaffold_groups": 341,
+        "draws": 2000,
+        "seed": 42,
+        "metrics": {
+          "rmse": {
+            "ci95": [
+              0.9501244454470233,
+              1.3076588805523919
+            ],
+            "valid_draws": 2000
+          },
+          "mae": {
+            "ci95": [
+              0.6541116944546363,
+              0.9189665125493367
+            ],
+            "valid_draws": 2000
+          },
+          "r2": {
+            "ci95": [
+              0.10538980909170598,
+              0.5845246990918036
+            ],
+            "valid_draws": 2000
+          }
+        }
+      },
+      "strata": {
+        "shared_train_scaffold=True": {
+          "compounds": 0,
+          "metrics": null
+        },
+        "shared_train_scaffold=False": {
+          "compounds": 802,
+          "metrics": {
+            "rmse": 1.1291051790026723,
+            "mae": 0.7772890637420996,
+            "r2": 0.39029975611075785
+          }
+        },
+        "near_train_neighbour=True": {
+          "compounds": 44,
+          "metrics": {
+            "rmse": 1.160941094935769,
+            "mae": 0.8374739108699146,
+            "r2": 0.5864657065566203
+          }
+        },
+        "near_train_neighbour=False": {
+          "compounds": 758,
+          "metrics": {
+            "rmse": 1.1272295732953217,
+            "mae": 0.7737954842254454,
+            "r2": 0.36827200155824336
+          }
+        }
+      },
+      "training_replicate_rows_collapsed": 689
+    }
+  },
+  "disclaimer": "Literature/patent-reported IC50; no efficacy, safety or suitability claim.",
+  "largest_scaffold_groups": [
+    {
+      "scaffold": "C1CCNC1",
+      "compounds": 133,
+      "random_test_compounds": 26
+    },
+    {
+      "scaffold": "O=C(CCc1ccccc1)N1CCCC1",
+      "compounds": 66,
+      "random_test_compounds": 16
+    },
+    {
+      "scaffold": "O=C(CCCc1ccccc1)N1CCn2cnnc2C1",
+      "compounds": 60,
+      "random_test_compounds": 10
+    },
+    {
+      "scaffold": "O=C(CCc1ccc(-c2ccccc2)cc1)N1CCCC1",
+      "compounds": 52,
+      "random_test_compounds": 4
+    },
+    {
+      "scaffold": "O=c1[nH]c2ccccc2c2nc(N3CCCCC3)n(Cc3ccccc3)c12",
+      "compounds": 40,
+      "random_test_compounds": 7
+    }
+  ],
+  "rmse_gap_scaffold_minus_random": 0.15942282388766538,
+  "inputs_verified_before_and_after": true,
+  "files": {
+    "random_predictions.csv": {
+      "sha256": "b85bea414ef849fe0c73485e437395ccf6ea8d4d9d3e7b1af7cebdc4ece9e8af"
+    },
+    "scaffold_predictions.csv": {
+      "sha256": "cc99349efdb3db4957fc896c5e4451c3757969493fc27100d90bfc82560e524f"
+    }
+  }
+}
