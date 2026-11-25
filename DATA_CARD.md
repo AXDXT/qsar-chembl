@@ -2,8 +2,10 @@
 
 Status: **Gate 2 in progress; human DPP4 (CHEMBL284) locked by Aadit.**
 The Gate 1 sections below describe the frozen raw pull. The Gate 2 split decisions are
-recorded at the end with the fixed leakage probe; the complete curation narrative,
-notebook and sign-off remain.
+recorded at the end with the fixed leakage probe. The executed walkthrough is
+`notebooks/gate2_dpp4_curation_and_leakage.ipynb` (rerun with
+`.venv/bin/python scripts/run_gate2_notebook.py`). The complete curation narrative,
+noise-reference review and sign-off remain.
 
 This dataset is literature-reported bioactivity measurements. It does not establish, and this
 project does not claim, the efficacy, safety or suitability of any compound.
