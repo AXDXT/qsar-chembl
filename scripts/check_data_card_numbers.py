@@ -1,0 +1,120 @@
+"""Re-check every figure quoted in the DATA_CARD Gate 2 curation section against the logs.
+
+Usage (repo root): .venv/bin/python scripts/check_data_card_numbers.py
+Reads the logged curation run, the curated CSVs and the frozen raw activities; exits
+nonzero on any mismatch. This is a documentation guard: it fails if the data card and
+the logged run ever disagree. It writes nothing.
+"""
+from __future__ import annotations
+
+import json
+from collections import Counter
+from pathlib import Path
+
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+LOG = ROOT / "results/curation/CHEMBL284/curation_log.json"
+CURATED = ROOT / "data/curated/CHEMBL284"
+RAW = ROOT / "data/raw/CHEMBL284"
+
+
+def main() -> int:
+    d = json.loads(LOG.read_text())
+    s = {x["step"]: x for x in d["steps"]}
+    i = d["identity_decisions"]
+    r = d["censoring_reconciliation"]
+    t = d["target_variable"]
+    n = d["replicate_noise"]
+    checks: list[tuple[str, bool]] = []
+
+    def ck(name: str, cond: object) -> None:
+        checks.append((name, bool(cond)))
+
+    ck("cascade counts", [(x["records_in"], x["records_out"], x["records_removed"]) for x in d["steps"]]
+       == [(8397, 8174, 223), (8174, 5781, 2393), (5781, 5781, 0), (5781, 5650, 131),
+           (5650, 4859, 791), (4859, 4855, 4), (4855, 3965, 890)])
+    ck("28 other activity types", s["2_single_activity_type"]["removed_activity_types"] == 28)
+    ck("unit refusals 78/48/5",
+       sorted(s["4_units_harmonised_to_nM"]["removed_breakdown"].values()) == [5, 48, 78])
+    ck("censored breakdown 732/54/4/1",
+       sorted(s["5_censored_removed"]["removed_breakdown"].values()) == [1, 4, 54, 732])
+    ck("855 salt or mixture rows", s["6_structure_standardised"]["salt_or_mixture_rows"] == 855)
+    ck("2 rows neutralised", s["6_structure_standardised"]["charged_rows_neutralised"] == 2)
+    ck("476 replicated compounds", s["7_duplicates_resolved"]["compounds_with_replicates"] == 476)
+    ck("108 flagged compounds",
+       s["7_duplicates_resolved"]["compounds_flagged_spread_over_1_log"] == 108)
+    ck("4000 molecule / 3965 parent ids",
+       (i["distinct_molecule_ids_in_curated_records"],
+        i["distinct_parent_ids_in_curated_records"]) == (4000, 3965))
+    ck("32 merged compounds absorbing 35 ids",
+       (i["compounds_merging_more_than_one_molecule_id"],
+        i["molecule_ids_absorbed_by_merging"]) == (32, 35))
+    ck("286 skeleton-sharing pairs",
+       i["stereoisomer_or_tautomer_pairs_sharing_a_skeleton"] == 286)
+    ck("src rows 4333 / 522", sorted(i["rows_by_src_id"].items()) == [("1", 4333), ("37", 522)])
+    ck("validity comments 133 / 53",
+       i["data_validity_comments"]["Outside typical range"] == 133
+       and i["data_validity_comments"]["Potential transcription error"] == 53)
+    ck("busiest compound 71 records", i["busiest_compound"]["n_records"] == 71)
+    ck("busiest compound median 7.74", round(i["busiest_compound"]["pIC50_median"], 2) == 7.74)
+    ck("busiest compound spread 4.14", round(i["busiest_compound"]["pIC50_spread"], 2) == 4.14)
+    ck("censoring reconciliation 796 / 791 / 5",
+       (r["gate1_rows_failing_exact_relation_recomputed"],
+        r["gate2_step5_censored_rows_removed"], r["difference"]) == (796, 791, 5))
+    ck("target summary statistics",
+       [round(t[k], 2) for k in ("min", "p05", "median", "mean", "stdev", "p95", "max")]
+       == [-0.04, 4.42, 7.17, 7.03, 1.33, 8.95, 10.10])
+    ck("80 exact-integer pIC50 compounds", sum(t["exact_integer_pIC50_values"].values()) == 80)
+    ck("integer pile-ups 8.0=33, 9.0=23",
+       t["exact_integer_pIC50_values"]["8.0"] == 33 and t["exact_integer_pIC50_values"]["9.0"] == 23)
+    ck("extremes 2 below pIC50 2, 108 below 4",
+       (t["below_2_implausible"], t["below_4"]) == (2, 108))
+    ck("noise 476 compounds / 1366 reports / 890 dof",
+       (n["replicated_compounds"], n["replicate_measurements"],
+        n["degrees_of_freedom"]) == (476, 1366, 890))
+    ck("pooled SD all groups 0.828",
+       round(n["pooled_within_compound_sd_all_groups"], 3) == 0.828)
+    ck("pooled SD differing groups 1.011",
+       round(n["pooled_within_compound_sd_differing_groups"], 3) == 1.011)
+    ck("pooled SD differing, spread<=1 is 0.310",
+       round(n["pooled_within_compound_sd_differing_under_1_log"], 3) == 0.310)
+    ck("noise dof 597 / 208",
+       (n["degrees_of_freedom_differing_groups"],
+        n["degrees_of_freedom_differing_under_1_log"]) == (597, 208))
+    ck("254 differing groups", n["groups_genuinely_differing"] == 254)
+    ck("222 identical groups", n["groups_numerically_identical"] == 222)
+    ck("56 groups spread >3 log units", n["spread_histogram_log_units"][">3"] == 56)
+    ck("max spread 8.32", round(n["spread_max"], 2) == 8.32)
+
+    # Figures quoted in the card that are computed from the files rather than read from the log.
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from src.retrieve import read_jsonl_gz  # noqa: E402  (after sys.path setup)
+
+    compounds = pd.read_csv(CURATED / "compounds.csv")
+    records = pd.read_csv(CURATED / "records_curated.csv")
+    busiest_id, raw_rows = Counter(
+        row["molecule_chembl_id"] for row in read_jsonl_gz(RAW / "activities.jsonl.gz")
+    ).most_common(1)[0]
+    surviving = records.loc[records.molecule_chembl_id == busiest_id]
+    ck("busiest raw molecule is CHEMBL1422 with 96 rows", (busiest_id, raw_rows) == ("CHEMBL1422", 96))
+    ck("63 of its rows survive to one compound",
+       (len(surviving), surviving.inchikey.nunique()) == (63, 1))
+    ck("3489 of 3965 compounds measured once",
+       (int((compounds.n_records == 1).sum()), len(compounds)) == (3489, 3965))
+    groups = records.groupby("inchikey").pIC50.agg(["count", "min", "max"])
+    groups = groups.loc[groups["count"] > 1]
+    spread = groups["max"] - groups["min"]
+    ck("146 differing groups with spread <=1 log unit",
+       int(((spread >= 0.01) & (spread <= 1)).sum()) == 146)
+
+    for name, ok in checks:
+        print(f"{'OK  ' if ok else 'FAIL'} {name}")
+    failed = [name for name, ok in checks if not ok]
+    print(f"{len(checks) - len(failed)}/{len(checks)} data-card figures match the logged run")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

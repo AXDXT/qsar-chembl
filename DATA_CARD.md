@@ -4,8 +4,10 @@ Status: **Gate 2 in progress; human DPP4 (CHEMBL284) locked by Aadit.**
 The Gate 1 sections below describe the frozen raw pull. The Gate 2 split decisions are
 recorded at the end with the fixed leakage probe. The executed walkthrough is
 `notebooks/gate2_dpp4_curation_and_leakage.ipynb` (rerun with
-`.venv/bin/python scripts/run_gate2_notebook.py`). The complete curation narrative,
-noise-reference review and sign-off remain.
+`.venv/bin/python scripts/run_gate2_notebook.py`). The Gate 2 curation cascade, its
+judgement calls, the target variable and the measured replicate dispersion are recorded
+below under "Gate 2 curation cascade"; the split design and the fixed leakage probe follow
+it. The noise-reference choice for Gate 4 and the room sign-off remain.
 
 This dataset is literature-reported bioactivity measurements. It does not establish, and this
 project does not claim, the efficacy, safety or suitability of any compound.
@@ -91,6 +93,117 @@ limitations visible here are:
 
 Gate 2 and later work must examine these limitations before any modelling. Selecting this target
 makes no claim about compound efficacy, safety or suitability.
+
+## Gate 2 curation cascade
+
+Command: `.venv/bin/python -m src.curate CHEMBL284`, also run by `./run_all.sh`. It reads only
+the frozen raw pull, verifies every raw checksum before and after, and re-verifies them at the
+end; nothing in `data/raw/` is written. Outputs: `data/curated/CHEMBL284/` (with its own
+manifest) and `results/curation/CHEMBL284/` (`curation_log.json`, `cascade.csv`, `cascade.md`,
+`cascade_funnel.png`, `units_refused.csv`, `structure_failures.csv`, `pic50_distribution.png`).
+The visual walkthrough is `notebooks/gate2_dpp4_curation_and_leakage.ipynb`.
+
+| Step | Rule | In | Out | Removed |
+|---|---|---:|---:|---:|
+| 1 Binding assays | `assay_type == 'B'` | 8,397 | 8,174 | 223 (A: 177, F: 46) |
+| 2 Single activity type | `standard_type == 'IC50'` | 8,174 | 5,781 | 2,393 across 28 other types (Inhibition 723, Ki 709, k_off 325, kon 325, …) |
+| 3 Single target organism | human target, tax id 9606 | 5,781 | 5,781 | 0 |
+| 4 Units harmonised to nM | molar unit string and finite positive value | 5,781 | 5,650 | 131 refused (78 missing unit, 48 `ug.mL-1`, 5 unusable value) |
+| 5 Censored values removed | `standard_relation == '='` exactly | 5,650 | 4,859 | 791 (`>`: 732, `<`: 54, `>>`: 4, `>=`: 1) |
+| 6 Structures standardised | sanitise → largest fragment → neutralise → canonical SMILES → InChIKey | 4,859 | 4,855 | 4 (no SMILES supplied) |
+| 7 Duplicates resolved | median pIC50 per standardised InChIKey | 4,855 records | **3,965 compounds** | 890 rows collapsed into medians |
+
+The unit of the count changes at step 7: records become compounds. Every refusal at step 4 and
+every failure at step 6 is itemised by row in a CSV; nothing is dropped silently. Step 6 took the
+largest fragment for 855 salt or mixture rows and neutralised 2 charged structures. Step 7 found
+476 compounds with replicates and flagged 108 whose replicates span more than 1 log unit.
+
+**Judgement calls Aadit must be able to defend:**
+
+- **Mass concentrations are refused, not converted.** 48 `ug.mL-1` rows are listed in
+  `units_refused.csv` and excluded. Converting them needs the molecular weight of the material
+  actually tested, which may be a salt and is not recorded here; converting would mix two
+  measurement bases under one column.
+- **Censored rows are removed, and the Gate 1 gap is reconciled.** Gate 1 measured 796 rows
+  failing the exact-relation test; this cascade removes 791 at step 5. The 5-row difference is
+  rows whose `standard_relation` *and* `standard_value` are both null: Gate 1 counted them as
+  "not exactly `=`", while this cascade removes them one step earlier at step 4, because a row
+  with no value cannot become a pIC50 whatever its relation says. The 4,859 rows that survive the
+  relation rule are identical in both gates (`censoring_reconciliation` in `curation_log.json`,
+  asserted by two tests). A `>` row states only that the IC50 exceeds the top concentration
+  tested; keeping it as a value would put an invented number into the target.
+- **Compound identity is the standardised InChIKey, not the ChEMBL molecule ID.** ChEMBL
+  separates a salt from its parent, so keying on molecule ID would enter the same chemistry
+  twice and could place the two copies on opposite sides of a split. Observed: 4,000 distinct
+  molecule IDs and 3,965 parent IDs in the curated records; 32 compounds merge more than one
+  molecule ID, absorbing 35 IDs. Molecule and parent IDs are kept as audit columns. Stereoisomers
+  and tautomers keep distinct full InChIKeys (286 pairs share a skeleton), so they stay separate
+  compounds — a defensible choice to disagree with, and the skeleton counts are logged for it.
+- **The one molecule with 96 raw rows is CHEMBL1422.** 63 of its rows survive to step 7 (the rest
+  are other endpoints: Inhibition, Kd, kinetics, or censored). Merged with three further ChEMBL
+  IDs for the same standardised structure, it becomes **one** compound with 71 accepted records,
+  median pIC50 7.74 and a spread of 4.14 log units, so it is also in the 108 flagged compounds.
+  Left as rows it would carry the weight of a whole analogue series and appear on both sides of a
+  random split.
+- **`src_id` 37 is BindingDB patent bioactivity data** (resolved from the API once by
+  `.venv/bin/python -m src.sources CHEMBL284`, snapshot in `results/sources/CHEMBL284/`). Curated
+  records: 4,333 from src_id 1 (primary literature) and 522 from src_id 37. They are kept, because
+  they are IC50 measurements against the same target, and retained as a column so the decision can
+  be revisited or tested. Patent and literature reporting regimes may differ in ways not visible here.
+- **Median, not mean, for replicates**, because the replicate sets have a long tail of cross-assay
+  disagreement that a mean would follow. Flagged high-spread compounds are reported, not discarded.
+- **ChEMBL's own validity comments are not used as an eighth filter.** 133 curated rows are marked
+  "Outside typical range" and 53 "Potential transcription error"; they are carried through as a
+  column and counted here. Adding that filter is Aadit's decision, and these counts say what is
+  at stake.
+
+### Target variable
+
+pIC50 = 9 − log10(IC50 in nM), equivalently −log10(IC50 in mol/L), per accepted record; the
+compound value is the median across its records. Over 3,965 compounds:
+min −0.04, 5th percentile 4.42, median 7.17, mean 7.03, SD 1.33, 95th percentile 8.95, max 10.10.
+Distribution figure: `results/curation/CHEMBL284/pic50_distribution.png`.
+
+Pathologies checked and reported rather than trimmed: there is **no** pile-up at a reporting
+convention such as pIC50 5.0 (10 µM) or 4.0 (100 µM) — the densest 0.1-log bins all sit in the
+6.6–7.9 interior. A rounding fingerprint is visible but small: 80 of 3,965 compounds sit on an
+exact integer pIC50, concentrated at 8.0 (33) and 9.0 (23). The extremes are implausible as
+measurements: 2 compounds below pIC50 2 (IC50 above 10 mM, past the solubility of most of these
+compounds) and 108 below pIC50 4. They are **kept and flagged**, because an activity threshold is
+a modelling choice belonging to a later gate; any later gate that trims them must say so and
+re-report the count. A hard assay ceiling would show as identical values at the top concentration
+tested; the `>` rows where such a ceiling normally hides were removed at step 5 and counted there,
+so the ceiling has been taken out of the target rather than flattened into it.
+
+### Measured replicate dispersion (the Gate 4 reference number)
+
+From the step-7 replicate groups: 476 replicated compounds, 1,366 individual reports, 890 degrees
+of freedom. Pooled within-compound SD, in pIC50 log units and so directly comparable with a model
+RMSE:
+
+| Subset | Groups | d.o.f. | Pooled SD |
+|---|---:|---:|---:|
+| All repeated groups | 476 | 890 | 0.828 |
+| Groups that genuinely differ | 254 | 597 | 1.011 |
+| Differing, spread ≤ 1 log unit | 146 | 208 | **0.310** |
+
+The recommended reference is **0.310**; 1.011 is the ceiling on how generous that figure could
+honestly be made, and 0.828 is reported for completeness but is not defensible in either
+direction, because it mixes identical re-reports (zero variance) with irreconcilable groups.
+The spread distribution is bimodal: 222 groups are numerically identical re-reports and 56 differ
+by more than 3 log units (max 8.32), so the mean spread describes neither mode; the histogram in
+`curation_log.json` is the honest summary.
+
+Four caveats travel with this number, and the last one is load-bearing. These are repeated
+literature and patent reports, not a designed replicate experiment, so none of these figures is
+pure assay noise. Only replicated compounds contribute: 3,489 of 3,965 compounds are measured
+once, so the floor is measured on 12.0% of the curated set. Independence of the repeat reports has
+not been established — equal reports may be copied rather than independently agreeing.
+And **0.310 is conditional dispersion for differing repeat groups with spread ≤ 1 log unit, not
+an unconditional lower bound on held-out RMSE**: predictions target compound medians rather than
+individual reports, the repeated subset may differ from the test population, and a test RMSE below
+0.310 would not by itself prove leakage or memorisation. Which figure Gate 4 may cite as its
+escape clause is still open; see "Open statistical review before sign-off" at the end of this card.
 
 ## Gate 2 split design and structural audit
 

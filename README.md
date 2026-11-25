@@ -27,6 +27,7 @@ implies efficacy, safety or suitability of any compound.
 | `results/` | logged outputs: counts, profiles, figures |
 | `notebooks/gate2_dpp4_curation_and_leakage.ipynb` | executed offline visual walkthrough; reruns the production modules from frozen raw data in temporary output directories |
 | `scripts/run_gate2_notebook.py` | executes all notebook cells without a server/kernel listener and saves verified outputs |
+| `scripts/check_data_card_numbers.py` | fails if any figure quoted in `DATA_CARD.md` disagrees with the logged curation run |
 | `tests/` | offline by default; `-m live` runs the tests that hit the ChEMBL API |
 
 ## Setup and run
@@ -43,6 +44,7 @@ implies efficacy, safety or suitability of any compound.
 .venv/bin/python -m src.splits CHEMBL284     # offline splits from checksum-verified curated compounds
 .venv/bin/python -m src.leakage_probe CHEMBL284  # fixed probe on both saved splits, no tuning
 .venv/bin/python scripts/run_gate2_notebook.py  # execute/save the visual walkthrough offline
+.venv/bin/python scripts/check_data_card_numbers.py  # every DATA_CARD figure vs the logged run
 ```
 
 The Gate 2 notebook can also be opened in Jupyter with the repo's `.venv` Python
