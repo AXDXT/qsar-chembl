@@ -1,0 +1,50 @@
+{
+  "target_chembl_id": "CHEMBL284",
+  "target_pref_name": "Dipeptidyl peptidase 4",
+  "target_organism": "Homo sapiens",
+  "target_type": "SINGLE PROTEIN",
+  "chembl_db_version": "ChEMBL_37",
+  "chembl_release_date": "2026-05-01",
+  "status_endpoint": "https://www.ebi.ac.uk/chembl/api/data/status.json",
+  "status_response": {
+    "activities": 24527044,
+    "chembl_db_version": "ChEMBL_37",
+    "chembl_release_date": "2026-05-01",
+    "compound_records": 3824604,
+    "disinct_compounds": 2921148,
+    "publications": 101100,
+    "status": "UP",
+    "targets": 18552
+  },
+  "retrieval_started_utc": "2026-11-25T06:45:22+00:00",
+  "retrieval_finished_utc": "2026-11-25T06:46:36+00:00",
+  "query": {
+    "resource": "activity",
+    "client_call": "new_client.activity.filter(target_chembl_id='CHEMBL284')",
+    "filters": {
+      "target_chembl_id": "CHEMBL284"
+    },
+    "equivalent_url": "https://www.ebi.ac.uk/chembl/api/data/activity.json?target_chembl_id=CHEMBL284",
+    "page_size": 1000,
+    "client_cache": "disabled",
+    "note": "No assay-type, activity-type, organism, unit or relation filter is applied at retrieval; all filtering happens downstream on a copy."
+  },
+  "record_count": 8397,
+  "api_total_count": 8397,
+  "client": {
+    "name": "chembl_webresource_client",
+    "version": "0.10.9",
+    "python": "3.13.7"
+  },
+  "raw_files": {
+    "activities.jsonl.gz": {
+      "sha256": "e9b45057e83def56e891acf1cc3da20ae062a2ee0a63e2103aadc1f5147a2a5a",
+      "format": "gzip JSON lines, one API record per line"
+    },
+    "target.json": {
+      "sha256": "16c59843a82652d6ebe71fe7b2070140b9b03c377c0e525c39945a6198a2443b",
+      "format": "JSON, API target record"
+    }
+  },
+  "command": "python -m src.retrieve CHEMBL284"
+}

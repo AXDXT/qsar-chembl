@@ -1,0 +1,563 @@
+{
+  "target_chembl_id": "CHEMBL284",
+  "chembl_db_version": "ChEMBL_37",
+  "retrieval_finished_utc": "2026-11-25T06:46:36+00:00",
+  "profiled_utc": "2026-11-25T06:49:10+00:00",
+  "source_manifest_sha256": "b9dd14afd98254d9bd9efcc17b0183d513920116c10803671c752ff2b226ab15",
+  "source_raw_files": {
+    "activities.jsonl.gz": {
+      "sha256": "e9b45057e83def56e891acf1cc3da20ae062a2ee0a63e2103aadc1f5147a2a5a",
+      "format": "gzip JSON lines, one API record per line"
+    },
+    "target.json": {
+      "sha256": "16c59843a82652d6ebe71fe7b2070140b9b03c377c0e525c39945a6198a2443b",
+      "format": "JSON, API target record"
+    }
+  },
+  "command": ".venv/bin/python -m src.profile CHEMBL284",
+  "record_count": 8397,
+  "distributions": {
+    "assay_type": {
+      "A": 177,
+      "B": 8174,
+      "F": 46
+    },
+    "standard_type": {
+      "% Ctrl": 1,
+      "% Inhibition of Control Values": 1,
+      "Activity": 98,
+      "Drug metabolism": 18,
+      "EC50": 4,
+      "IC5": 2,
+      "IC50": 5818,
+      "INH": 1,
+      "Inhibition": 734,
+      "K": 62,
+      "K inact": 2,
+      "K obs / 1": 8,
+      "Ka": 1,
+      "Kapp": 1,
+      "Kd": 26,
+      "Kdiss": 1,
+      "Ki": 709,
+      "Km": 23,
+      "Ratio IC50": 12,
+      "Ratio Ki": 5,
+      "Selectivity index": 68,
+      "Stability": 80,
+      "T1/2": 40,
+      "TIME": 21,
+      "TdeltaS": 1,
+      "Vmax": 4,
+      "Vmax/Km": 4,
+      "deltaG": 1,
+      "deltaH": 1,
+      "k_off": 325,
+      "kon": 325
+    },
+    "standard_units": {
+      "%": 880,
+      "/min": 8,
+      "10'-2/s": 3,
+      "10'-3/s": 4,
+      "10'-4/s": 12,
+      "10'-5/s": 1,
+      "10'3/M/s": 1,
+      "10'4/M/s": 1,
+      "10'5/M/s": 4,
+      "10'6/M/min": 6,
+      "10'6/M/s": 9,
+      "10'7/M/s": 2,
+      "10'8/M/min": 1,
+      "10^-4/s": 6,
+      "10^2kJ/mol": 2,
+      "10^3kJ/mol": 1,
+      "10^4/M/s": 1,
+      "10^5/M": 1,
+      "10^5/M/s": 5,
+      "<missing>": 520,
+      "M-1 s-1": 8,
+      "hr": 61,
+      "nM": 6474,
+      "nmol/hr/microg": 4,
+      "s-1": 327,
+      "uM": 7,
+      "ug.mL-1": 48
+    },
+    "standard_relation": {
+      "<": 82,
+      "<=": 1,
+      "<missing>": 350,
+      "=": 7116,
+      ">": 839,
+      ">=": 2,
+      ">>": 5,
+      "~": 2
+    },
+    "target_organism": {
+      "Homo sapiens": 8397
+    },
+    "assay_organism": {
+      "<missing>": 8397
+    },
+    "src_id": {
+      "1": 7109,
+      "37": 1281,
+      "38": 2,
+      "54": 2,
+      "65": 1,
+      "72": 2
+    }
+  },
+  "missing_values_by_field": {
+    "action_type": {
+      "absent": 0,
+      "null": 7791,
+      "blank": 0,
+      "total_missing": 7791
+    },
+    "activity_comment": {
+      "absent": 0,
+      "null": 7047,
+      "blank": 0,
+      "total_missing": 7047
+    },
+    "activity_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "activity_properties": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "assay_chembl_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "assay_description": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "assay_organism": {
+      "absent": 8397,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 8397
+    },
+    "assay_type": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "assay_variant_accession": {
+      "absent": 0,
+      "null": 8397,
+      "blank": 0,
+      "total_missing": 8397
+    },
+    "assay_variant_mutation": {
+      "absent": 0,
+      "null": 8397,
+      "blank": 0,
+      "total_missing": 8397
+    },
+    "bao_endpoint": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "bao_format": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "bao_label": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "canonical_smiles": {
+      "absent": 0,
+      "null": 5,
+      "blank": 0,
+      "total_missing": 5
+    },
+    "data_validity_comment": {
+      "absent": 0,
+      "null": 8018,
+      "blank": 0,
+      "total_missing": 8018
+    },
+    "data_validity_description": {
+      "absent": 0,
+      "null": 8018,
+      "blank": 0,
+      "total_missing": 8018
+    },
+    "document_chembl_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "document_journal": {
+      "absent": 0,
+      "null": 1286,
+      "blank": 0,
+      "total_missing": 1286
+    },
+    "document_year": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "ligand_efficiency": {
+      "absent": 0,
+      "null": 3043,
+      "blank": 0,
+      "total_missing": 3043
+    },
+    "modality": {
+      "absent": 0,
+      "null": 8397,
+      "blank": 0,
+      "total_missing": 8397
+    },
+    "molecule_chembl_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "molecule_pref_name": {
+      "absent": 0,
+      "null": 7908,
+      "blank": 0,
+      "total_missing": 7908
+    },
+    "parent_molecule_chembl_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "pchembl_value": {
+      "absent": 0,
+      "null": 3006,
+      "blank": 0,
+      "total_missing": 3006
+    },
+    "potential_duplicate": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "qudt_units": {
+      "absent": 0,
+      "null": 927,
+      "blank": 0,
+      "total_missing": 927
+    },
+    "record_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "relation": {
+      "absent": 0,
+      "null": 350,
+      "blank": 0,
+      "total_missing": 350
+    },
+    "src_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "standard_flag": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "standard_relation": {
+      "absent": 0,
+      "null": 350,
+      "blank": 0,
+      "total_missing": 350
+    },
+    "standard_text_value": {
+      "absent": 0,
+      "null": 8115,
+      "blank": 0,
+      "total_missing": 8115
+    },
+    "standard_type": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "standard_units": {
+      "absent": 0,
+      "null": 520,
+      "blank": 0,
+      "total_missing": 520
+    },
+    "standard_upper_value": {
+      "absent": 0,
+      "null": 8397,
+      "blank": 0,
+      "total_missing": 8397
+    },
+    "standard_value": {
+      "absent": 0,
+      "null": 1003,
+      "blank": 0,
+      "total_missing": 1003
+    },
+    "target_chembl_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "target_organism": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "target_pref_name": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "target_tax_id": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "text_value": {
+      "absent": 0,
+      "null": 8115,
+      "blank": 0,
+      "total_missing": 8115
+    },
+    "toid": {
+      "absent": 0,
+      "null": 8397,
+      "blank": 0,
+      "total_missing": 8397
+    },
+    "type": {
+      "absent": 0,
+      "null": 0,
+      "blank": 0,
+      "total_missing": 0
+    },
+    "units": {
+      "absent": 0,
+      "null": 440,
+      "blank": 0,
+      "total_missing": 440
+    },
+    "uo_units": {
+      "absent": 0,
+      "null": 927,
+      "blank": 0,
+      "total_missing": 927
+    },
+    "upper_value": {
+      "absent": 0,
+      "null": 8395,
+      "blank": 0,
+      "total_missing": 8395
+    },
+    "value": {
+      "absent": 0,
+      "null": 1003,
+      "blank": 0,
+      "total_missing": 1003
+    }
+  },
+  "missing_definition": "Absent key, null, or blank string; empty containers are retained as API values.",
+  "compound_row_counts": {
+    "distinct_molecule_ids": 5752,
+    "rows_missing_molecule_id": 0,
+    "molecules_with_multiple_rows": 1084,
+    "rows_beyond_first_per_molecule": 2645,
+    "minimum": 1,
+    "median": 1.0,
+    "maximum": 96,
+    "histogram_rows_per_molecule": {
+      "1": 4668,
+      "2": 594,
+      "3": 276,
+      "4": 38,
+      "5": 15,
+      "6": 65,
+      "7": 51,
+      "8": 9,
+      "9": 18,
+      "10": 3,
+      "11": 3,
+      "13": 2,
+      "14": 1,
+      "20": 1,
+      "22": 1,
+      "27": 1,
+      "36": 1,
+      "40": 1,
+      "43": 1,
+      "46": 1,
+      "72": 1,
+      "96": 1
+    },
+    "interpretation": "Raw rows per molecule ID across all endpoints and assays; not experimentally verified replicates."
+  },
+  "documents": {
+    "distinct_ids": 334,
+    "rows_missing_id": 0,
+    "top_ten_by_rows": {
+      "CHEMBL5729439": 159,
+      "CHEMBL5728672": 153,
+      "CHEMBL5729553": 153,
+      "CHEMBL5244277": 149,
+      "CHEMBL1153716": 144,
+      "CHEMBL5725456": 138,
+      "CHEMBL5726479": 138,
+      "CHEMBL1144883": 137,
+      "CHEMBL5727415": 96,
+      "CHEMBL1145816": 93
+    }
+  },
+  "count_only_gate2_approximation": {
+    "cascade": {
+      "all_records": 8397,
+      "binding_assay": 8174,
+      "ic50": 5781,
+      "human_target": 5781,
+      "molar_units": 5655,
+      "exact_relation": 4859,
+      "positive_finite_value": 4859
+    },
+    "filtered_records": 4859,
+    "distinct_compounds": 4004,
+    "survivors_missing_compound_id": 0,
+    "distinct_surviving_assays": 337,
+    "distinct_surviving_documents": 258,
+    "raw_distributions": {
+      "assay_type": {
+        "A": 177,
+        "B": 8174,
+        "F": 46
+      },
+      "standard_type": {
+        "% Ctrl": 1,
+        "% Inhibition of Control Values": 1,
+        "Activity": 98,
+        "Drug metabolism": 18,
+        "EC50": 4,
+        "IC5": 2,
+        "IC50": 5818,
+        "INH": 1,
+        "Inhibition": 734,
+        "K": 62,
+        "K inact": 2,
+        "K obs / 1": 8,
+        "Ka": 1,
+        "Kapp": 1,
+        "Kd": 26,
+        "Kdiss": 1,
+        "Ki": 709,
+        "Km": 23,
+        "Ratio IC50": 12,
+        "Ratio Ki": 5,
+        "Selectivity index": 68,
+        "Stability": 80,
+        "T1/2": 40,
+        "TIME": 21,
+        "TdeltaS": 1,
+        "Vmax": 4,
+        "Vmax/Km": 4,
+        "deltaG": 1,
+        "deltaH": 1,
+        "k_off": 325,
+        "kon": 325
+      },
+      "standard_units": {
+        "%": 880,
+        "/min": 8,
+        "10'-2/s": 3,
+        "10'-3/s": 4,
+        "10'-4/s": 12,
+        "10'-5/s": 1,
+        "10'3/M/s": 1,
+        "10'4/M/s": 1,
+        "10'5/M/s": 4,
+        "10'6/M/min": 6,
+        "10'6/M/s": 9,
+        "10'7/M/s": 2,
+        "10'8/M/min": 1,
+        "10^-4/s": 6,
+        "10^2kJ/mol": 2,
+        "10^3kJ/mol": 1,
+        "10^4/M/s": 1,
+        "10^5/M": 1,
+        "10^5/M/s": 5,
+        "<missing>": 520,
+        "M-1 s-1": 8,
+        "hr": 61,
+        "nM": 6474,
+        "nmol/hr/microg": 4,
+        "s-1": 327,
+        "uM": 7,
+        "ug.mL-1": 48
+      },
+      "standard_relation": {
+        "<": 82,
+        "<=": 1,
+        "<missing>": 350,
+        "=": 7116,
+        ">": 839,
+        ">=": 2,
+        ">>": 5,
+        "~": 2
+      },
+      "target_organism": {
+        "Homo sapiens": 8397
+      }
+    }
+  },
+  "filter_policy": {
+    "binding_assay": "assay_type == 'B'",
+    "ic50": "standard_type == 'IC50'",
+    "human_target": "target_organism == 'Homo sapiens' and str(target_tax_id) == '9606'",
+    "molar_units": "standard_units in ['M', 'mM', 'uM', 'µM', 'μM', 'nM', 'pM', 'fM'] (molar concentrations convertible to nM)",
+    "exact_relation": "standard_relation == '='; censored, approximate and missing relations excluded",
+    "positive_finite_value": "Diagnostic only, after the headline count: standard_value parses as a finite number > 0",
+    "distinct_compounds": "unique nonempty molecule_chembl_id among surviving rows; no structure processing",
+    "organism_interpretation": "Target organism, not assay expression host; candidates must have one human protein component",
+    "limitations": "Count-only approximation of Gate 2: no salts, stereochemistry, duplicates, conflicting replicates, assay quality or structure checks",
+    "unit_limitations": "Conservative whitelist of plain molar units; uncommon scaled unit strings are excluded pending interpretation in Gate 2"
+  }
+}

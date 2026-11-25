@@ -1,7 +1,7 @@
 # Project 19 - QSAR Bioactivity Modelling (ChEMBL)
 
-Second-year B.Tech CS (AI and ML) coursework, dataset-only. Status: **Gate 1 in progress**
-(repository, retrieval, candidate-target counts). No curation, featurisation, splitting or
+Second-year B.Tech CS (AI and ML) coursework, dataset-only. Status: **Gate 1 ready for review**
+(repository, retrieval, candidate-target counts and raw profile). No curation, featurisation, splitting or
 modelling yet - those are later gates.
 
 This project models literature-reported bioactivity measurements. Nothing in it claims or
@@ -15,7 +15,8 @@ implies efficacy, safety or suitability of any compound.
 | `src/retrieve.py` | target-parameterised ChEMBL pull -> `data/raw/<TARGET>/` + manifest |
 | `src/candidates.py` | count-only comparison of four candidate human protein targets |
 | `src/provenance.py` | saves ChEMBL's README, LICENSE, REQUIRED.ATTRIBUTION and API status to `results/licence/` |
-| `DATA_CARD.md` | provenance, licence and (after the raw profile) composition and known biases |
+| `src/profile.py` | read-only raw profile, missing values and row counts per molecule ID |
+| `DATA_CARD.md` | provenance, licence, measured composition and known biases |
 | `data/raw/` | **immutable**: unmodified API responses only, each with `manifest.json` (sha256 per file) |
 | `data/curated/` | derived data (Gate 2 onwards), always regenerated from `data/raw/` by code |
 | `results/` | logged outputs: counts, profiles, figures |
@@ -26,11 +27,12 @@ implies efficacy, safety or suitability of any compound.
 
 ```bash
 .venv/bin/pip install -r requirements.txt   # Python 3.13; versions pinned from the working .venv
-./run_all.sh                 # compile, offline tests, count shortlist and pull CHEMBL220 if missing
+./run_all.sh                 # compile, offline tests, reuse/fetch snapshots, pull/profile CHEMBL284
 ./run_all.sh <TARGET_ID>     # same for another ChEMBL target id
 .venv/bin/python -m pytest -q -m live       # tests that need the live API
 .venv/bin/python -m src.candidates          # live measured counts for all four candidates
 .venv/bin/python -m src.candidates CHEMBL220 CHEMBL203  # compare selected targets
+.venv/bin/python -m src.profile CHEMBL284    # offline profile of a frozen pull
 ```
 
 Pull one target directly: `.venv/bin/python -m src.retrieve CHEMBL220`. An existing pull is never
@@ -64,6 +66,20 @@ additional compound information. The precise accepted units and exclusions are
 recorded in each run log. Uncommon scaled unit strings are conservatively excluded
 pending interpretation in Gate 2. The final target remains subject to class uniqueness
 and instructor approval.
+
+Both build-room agents recommend **CHEMBL284 (DPP4)** provisionally: its measured
+4,004 distinct molecule IDs after the headline count filters give room for later
+curation, with a smaller raw pull than the other candidates. The recommendation
+is based on dataset size and scope, not on any model score. The saved full pull
+has 8,397 records; its raw profile independently reproduces the shortlist's
+4,859 filtered rows and 4,004 molecule IDs. See `DATA_CARD.md` and
+`results/profiles/CHEMBL284/` for composition and cautions.
+
+The profiler verifies raw checksums before and after reading, writes only under
+`results/`, and emits `profile.json`, `profile.md` and `compound_row_counts.csv`.
+Counts of repeated rows do not establish experimentally independent replicates.
+`run_all.sh <TARGET_ID>` retrieves and profiles another target without changing
+the saved DPP4 pull or selecting a final coursework target.
 
 ## Reproducibility conventions
 
