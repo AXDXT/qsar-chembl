@@ -14,6 +14,8 @@ implies efficacy, safety or suitability of any compound.
 | `src/config.py` | the single global seed (`SEED = 42`) and all paths |
 | `src/retrieve.py` | target-parameterised ChEMBL pull -> `data/raw/<TARGET>/` + manifest |
 | `src/candidates.py` | count-only comparison of four candidate human protein targets |
+| `src/provenance.py` | saves ChEMBL's README, LICENSE, REQUIRED.ATTRIBUTION and API status to `results/licence/` |
+| `DATA_CARD.md` | provenance, licence and (after the raw profile) composition and known biases |
 | `data/raw/` | **immutable**: unmodified API responses only, each with `manifest.json` (sha256 per file) |
 | `data/curated/` | derived data (Gate 2 onwards), always regenerated from `data/raw/` by code |
 | `results/` | logged outputs: counts, profiles, figures |
@@ -73,4 +75,35 @@ and instructor approval.
 
 ## Data source, licence and citation
 
-To be filled from the EBI/ChEMBL pages themselves (Gate 1 item 3) - not yet verified.
+Checked 2026-11-25 (UTC) with `.venv/bin/python -m src.provenance`, which saves the files below
+unmodified, with their sha256, under `results/licence/`. Everything in this section is quoted
+or paraphrased from those files only.
+
+- **Source:** ChEMBL, EMBL-EBI, <https://www.ebi.ac.uk/chembl/>, accessed through the REST API
+  (`https://www.ebi.ac.uk/chembl/api/data`) via `chembl_webresource_client`.
+- **Version:** `ChEMBL_37`, release date 2026-05-01, from the API status endpoint
+  (`results/licence/status.json`). The FTP README header says "Release: chembl_37,
+  Date: 01/05/2026". These two agree, and the manifest records that check (`release_matches: true`).
+- **Licence:** Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0). Source:
+  <https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/README> and the full licence text at
+  <https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/LICENSE>.
+- **Required attribution** (FTP README): the attribution must contain the URL of the resource and
+  the release version, for example: *"ChEMBL data is from http://www.ebi.ac.uk/chembl - the version
+  of ChEMBL is chembl_37."* If ChEMBL is built into other works, EBI asks that ChEMBL IDs be kept and
+  the release number be shown clearly
+  (<https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/REQUIRED.ATTRIBUTION>).
+- **Citation EBI asks for** (REQUIRED.ATTRIBUTION, "primary current citation"):
+  Mendez D, Gaulton A, Bento AP, Chambers J, De Veij M, Félix E, Magariños MP, Mosquera JF, Mutowo P,
+  Nowotka M, Gordillo-Marañón M, Hunter F, Junco L, Mugumbate G, Rodriguez-Lopez M, Atkinson F,
+  Bosc N, Radoux CJ, Segura-Cabrera A, Hersey A, Leach AR. ChEMBL: towards direct deposition of
+  bioassay data. *Nucleic Acids Res.* 2019 47(D1):D930-D940. DOI: 10.1093/nar/gky1075
+
+**ChEMBL data is from http://www.ebi.ac.uk/chembl - the version of ChEMBL is chembl_37.**
+
+What this means for this repo (our reading, not legal advice): any ChEMBL-derived data we share
+(`data/raw/`, `data/curated/`) is an adaptation under the ShareAlike term, so it must stay under
+CC BY-SA 3.0 with the attribution above. ChEMBL IDs are kept throughout. The licence for this
+repository's own *code* is still undecided (see "Needs decision" in the room file).
+
+**Not verified:** the general EMBL-EBI terms of use for the web services, and whether the ChEMBL
+web portal suggests a different or newer citation. Only the FTP files above were checked.

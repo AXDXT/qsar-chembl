@@ -1,0 +1,32 @@
+{
+  "command": ".venv/bin/python -m src.provenance",
+  "files": {
+    "README": {
+      "url": "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/README",
+      "fetched_utc": "2026-11-25T06:42:33+00:00",
+      "sha256": "127e85ad43aefa88b5efdd168dbf6814114fdfcc529c23f76f83296a42b67fd3",
+      "bytes": 3616
+    },
+    "LICENSE": {
+      "url": "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/LICENSE",
+      "fetched_utc": "2026-11-25T06:42:52+00:00",
+      "sha256": "f0c22ca33207ad8a85129a71f1454fcf8f2f71c99e68da5da01538210fa3ffba",
+      "bytes": 21142
+    },
+    "REQUIRED.ATTRIBUTION": {
+      "url": "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/REQUIRED.ATTRIBUTION",
+      "fetched_utc": "2026-11-25T06:42:54+00:00",
+      "sha256": "41eb0cf5eb2ceec5954db84f6c73969c7d928799fe39a7771140cdb0afc4a0df",
+      "bytes": 733
+    },
+    "status.json": {
+      "url": "https://www.ebi.ac.uk/chembl/api/data/status.json",
+      "fetched_utc": "2026-11-25T06:42:57+00:00",
+      "sha256": "29dc1fb09487a8d2962253a4d0d92c4ded0aa0d831effab42445d0c3483d4740",
+      "bytes": 212
+    }
+  },
+  "api_chembl_db_version": "ChEMBL_37",
+  "ftp_readme_release": "chembl_37",
+  "release_matches": true
+}
