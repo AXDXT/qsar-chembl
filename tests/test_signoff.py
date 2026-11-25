@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from scripts.check_data_card_numbers import (gate3_baseline_checks, gate3_feature_checks,
-                                             signoff_table_checks)
+from scripts.check_data_card_numbers import (gate3_baseline_checks, gate3_contrast_checks,
+                                             gate3_feature_checks, signoff_table_checks)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,3 +99,51 @@ def test_missing_or_duplicate_baseline_rows_fail(duplicate):
     row = next(line for line in text.splitlines() if line.startswith("| random / Descriptor RF |"))
     changed = text.replace(row, row + "\n" + row if duplicate else "")
     assert not all(ok for _, ok in gate3_baseline_checks(changed, json.loads(BASELINE_LOG.read_text())))
+
+
+GATE3_SIGNOFF = ROOT / "GATE3_SIGNOFF.md"
+CONTRAST_LABELS = ["Scaffold minus random test RMSE, Descriptor RF",
+                   "Scaffold minus random test RMSE, Training mean",
+                   "Descriptor RF test RMSE reduction vs mean, random",
+                   "Descriptor RF test RMSE reduction vs mean, scaffold",
+                   "Descriptor RF test/train RMSE ratio, random",
+                   "Descriptor RF test/train RMSE ratio, scaffold"]
+
+
+def test_gate3_handoff_repeats_the_baseline_table_and_contrasts_from_the_same_log():
+    report = json.loads(BASELINE_LOG.read_text())
+    text = GATE3_SIGNOFF.read_text()
+    baseline = gate3_baseline_checks(text, report)
+    contrast = gate3_contrast_checks(text, report)
+    assert len(baseline) == 14 and all(ok for _, ok in baseline)
+    assert len(contrast) == len(CONTRAST_LABELS) and all(ok for _, ok in contrast)
+
+
+@pytest.mark.parametrize("label", CONTRAST_LABELS)
+def test_a_derived_contrast_that_does_not_follow_from_the_log_fails(label):
+    """A plausible-looking hand-written contrast must not survive the guard."""
+    text = GATE3_SIGNOFF.read_text()
+    row = next(line for line in text.splitlines() if line.startswith(f"| {label} |"))
+    report = json.loads(BASELINE_LOG.read_text())
+    for wrong in ("+0.999", "99.9%", "9.99", "0.000"):
+        changed = text.replace(row, f"| {label} | {wrong} |")
+        assert not all(ok for _, ok in gate3_contrast_checks(changed, report))
+
+
+@pytest.mark.parametrize("label", CONTRAST_LABELS)
+def test_rounding_a_contrast_from_the_printed_cells_instead_of_the_log_fails(label):
+    """Deriving a contrast from the rounded table rather than full precision must fail.
+
+    The Descriptor RF split difference is +0.154 from the logged RMSEs but +0.153
+    from the 3-decimal cells, which is exactly the drift this check exists to catch.
+    """
+    text = GATE3_SIGNOFF.read_text()
+    row = next(line for line in text.splitlines() if line.startswith(f"| {label} |"))
+    value = row.strip("|").split("|")[1].strip()
+    digits, percent = value.rstrip("%"), value.endswith("%")
+    places = len(digits.split(".")[1])
+    # One unit in the last displayed place: the smallest drift the guard must still catch.
+    nudged = f"{float(digits) - 10 ** -places:+.{places}f}" if digits[0] == "+" else \
+             f"{float(digits) - 10 ** -places:.{places}f}"
+    changed = text.replace(row, f"| {label} | {nudged}{'%' if percent else ''} |")
+    assert not all(ok for _, ok in gate3_contrast_checks(changed, json.loads(BASELINE_LOG.read_text())))

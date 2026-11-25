@@ -126,6 +126,32 @@ def gate3_baseline_checks(text: str, report: dict) -> list[tuple[str, bool]]:
             for label, values in expected.items()]
 
 
+def gate3_contrast_checks(text: str, report: dict) -> list[tuple[str, bool]]:
+    """Re-derive the quoted split and floor contrasts from the logged RMSEs.
+
+    These are differences and ratios of logged point estimates, computed at full
+    precision rather than from the rounded table cells, so a hand-written figure
+    that was never derived from this run fails here.
+    """
+    rows = _table_rows(text)
+    rmse = {(split, model, side): report["splits"][split]["models"][model][side]["rmse"]
+            for split in ("random", "scaffold") for model in ("mean", "descriptor_rf")
+            for side in ("train", "test")}
+    expected = {
+        "Scaffold minus random test RMSE, Descriptor RF":
+            f"{rmse['scaffold', 'descriptor_rf', 'test'] - rmse['random', 'descriptor_rf', 'test']:+.3f}",
+        "Scaffold minus random test RMSE, Training mean":
+            f"{rmse['scaffold', 'mean', 'test'] - rmse['random', 'mean', 'test']:+.3f}",
+    }
+    for split in ("random", "scaffold"):
+        expected[f"Descriptor RF test RMSE reduction vs mean, {split}"] = (
+            f"{1 - rmse[split, 'descriptor_rf', 'test'] / rmse[split, 'mean', 'test']:.1%}")
+        expected[f"Descriptor RF test/train RMSE ratio, {split}"] = (
+            f"{rmse[split, 'descriptor_rf', 'test'] / rmse[split, 'descriptor_rf', 'train']:.2f}")
+    return [(f"Gate 3 contrast: {label}", rows.get(label) == [[value]])
+            for label, value in expected.items()]
+
+
 def main() -> int:
     d = json.loads(LOG.read_text())
     s = {x["step"]: x for x in d["steps"]}
@@ -243,9 +269,13 @@ def main() -> int:
     checks.extend(gate3_feature_checks(
         (ROOT / "DATA_CARD.md").read_text(),
         json.loads((FEATURES / "manifest.json").read_text())))
-    checks.extend(gate3_baseline_checks(
-        (ROOT / "DATA_CARD.md").read_text(),
-        json.loads((ROOT / "results/baselines/CHEMBL284/baselines.json").read_text())))
+    baselines = json.loads((ROOT / "results/baselines/CHEMBL284/baselines.json").read_text())
+    checks.extend(gate3_baseline_checks((ROOT / "DATA_CARD.md").read_text(), baselines))
+    # The Gate 3 handoff repeats the same table, so it is held to the same logs.
+    signoff = (ROOT / "GATE3_SIGNOFF.md").read_text()
+    checks.extend((f"handoff {name}", ok)
+                  for name, ok in gate3_baseline_checks(signoff, baselines))
+    checks.extend(gate3_contrast_checks(signoff, baselines))
 
     for name, ok in checks:
         print(f"{'OK  ' if ok else 'FAIL'} {name}")

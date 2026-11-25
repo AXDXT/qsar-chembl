@@ -8,6 +8,7 @@ decision and final approval remain; see [the Gate 2 handoff](GATE2_SIGNOFF.md).
 Gate 3 provides a deterministic, checksummed descriptor and Morgan fingerprint cache
 built only from the standardised structures, plus training-mean and descriptor-only forest
 baselines under both saved splits. The full train/test table and uncertainty are in
+[the Gate 3 handoff](GATE3_SIGNOFF.md),
 [DATA_CARD.md](DATA_CARD.md#gate-3-fixed-baselines) and
 [`results/baselines/CHEMBL284/baselines.md`](results/baselines/CHEMBL284/baselines.md).
 No Gate 4 model, hyperparameter search or combined feature model has been fitted.
@@ -36,7 +37,7 @@ implies efficacy, safety or suitability of any compound.
 | `results/` | logged outputs: counts, profiles, figures |
 | `notebooks/gate2_dpp4_curation_and_leakage.ipynb` | executed offline visual walkthrough; reruns the production modules from frozen raw data in temporary output directories |
 | `scripts/run_gate2_notebook.py` | executes all notebook cells without a server/kernel listener and saves verified outputs |
-| `scripts/check_data_card_numbers.py` | checks documented curation figures and compares the `GATE2_SIGNOFF.md`, Gate 3 feature and baseline tables directly with logged results |
+| `scripts/check_data_card_numbers.py` | checks documented curation figures and compares the `GATE2_SIGNOFF.md`, `GATE3_SIGNOFF.md`, Gate 3 feature and baseline tables directly with logged results |
 | `tests/` | offline by default; `-m live` runs the tests that hit the ChEMBL API |
 
 ## Setup and run
