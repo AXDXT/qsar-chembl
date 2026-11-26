@@ -1,4 +1,4 @@
-"""Check DATA_CARD curation figures and the Gate 2 sign-off tables against the logs.
+"""Check DATA_CARD and Gate 2–4 result tables against the logged runs.
 
 Usage (repo root): .venv/bin/python scripts/check_data_card_numbers.py
 Reads the logged curation run, the curated CSVs and the frozen raw activities; exits
@@ -7,6 +7,7 @@ checks read the Markdown and compare its cells directly with the logs. It writes
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections import Counter
@@ -152,6 +153,121 @@ def gate3_contrast_checks(text: str, report: dict) -> list[tuple[str, bool]]:
             for label, value in expected.items()]
 
 
+def load_gate4_controls(directory: Path) -> dict:
+    """Read completed controls, verifying the search identity and report checksum."""
+    return _load_gate4_searches(directory, "descriptors")
+
+
+def load_gate4_combined(directory: Path) -> dict:
+    """Return each completed combined search while the other split may still be training."""
+    return _load_gate4_searches(directory, "combined")
+
+
+def _load_gate4_searches(directory: Path, block: str) -> dict:
+    def digest(value):
+        encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        return hashlib.sha256(encoded.encode()).hexdigest()
+
+    runs = {}
+    for split in ("scaffold", "random"):
+        path = directory / split / block
+        manifest = json.loads((path / "manifest.json").read_text())
+        if block == "combined" and not (path / "report.json").exists():
+            continue
+        record = json.loads((path / "report.json").read_text())
+        report = record["result"]
+        identity = digest(manifest)
+        if (record["name"] != "report" or record["identity"] != identity
+                or record["sha256"] != digest(report)
+                or report["identity_sha256"] != identity):
+            raise ValueError(f"Gate 4 {split}/{block} checksum/identity mismatch")
+        if (any(row["partition"] != "train" for row in manifest["rows"])
+                or report["heldout_evaluations"] != 0):
+            raise ValueError("Gate 4 search summary requires training-only results")
+        runs[split] = (manifest, report)
+    return runs
+
+
+def gate4_control_checks(text: str, runs: dict) -> list[tuple[str, bool]]:
+    """Compare training-only OOF scores, selections and compute figures with logs."""
+    return _gate4_training_checks(text, runs, combined=False)
+
+
+def gate4_combined_checks(text: str, runs: dict) -> list[tuple[str, bool]]:
+    """Guard the combined search table, including fit-local representation choices."""
+    if set(runs) != {"scaffold", "random"}:
+        summary_rows = [label for label in _table_rows(text)
+                        if label.startswith("Combined ") or "Tuned descriptors+Morgan (OOF)" in label]
+        return [("Gate 4 combined score table awaits both completed reports", not summary_rows)]
+    return _gate4_training_checks(text, runs, combined=True)
+
+
+def _gate4_training_checks(text: str, runs: dict, *, combined: bool) -> list[tuple[str, bool]]:
+    rows, expected = _table_rows(text), {}
+    prefix = "Combined" if combined else "Control"
+    model_label = "Tuned descriptors+Morgan" if combined else "Tuned descriptor control"
+
+    def parameters(choice):
+        return f"{choice['max_features']} / {choice['min_samples_leaf']}"
+
+    protocol = {}
+    for split in ("scaffold", "random"):
+        manifest, report = runs[split]
+        cells = [f"{len(manifest['rows']):,}"]
+        for metric in ("r2", "rmse", "mae"):
+            value = report["oof_metrics"][metric]
+            ci = report["oof_bootstrap"]["metrics"][metric]["ci95"]
+            cells.append(f"{value:.3f} [{ci[0]:.3f}, {ci[1]:.3f}]"
+                         if value is not None and ci else "undefined")
+        cells.append(f"{report['outer_fold_spread']['rmse']['sample_sd']:.3f}")
+        expected[f"{split} / {model_label} (OOF)"] = cells
+        protocol[split] = {
+            "Control outer folds": str(len(manifest["outer_plan"])),
+            "Control inner folds per outer fold": " / ".join(
+                str(len(plan)) for plan in manifest["inner_plan"]),
+            "Control final-selection folds": str(len(manifest["final_plan"])),
+            "Control grid candidates": str(len(manifest["candidates"])),
+            "Control forest trees": str(manifest["estimator"]["n_estimators"]),
+            ("Control final-fit feature columns" if combined else "Control feature columns"):
+                str(len(manifest["descriptor_columns"]) + report["final_fpSize"]
+                if combined else manifest["feature_shape"][1]),
+            "Control seed": str(manifest["seed"]),
+            "Control bootstrap draws": str(report["oof_bootstrap"]["draws"]),
+            "Control bootstrap scaffold groups": str(report["oof_bootstrap"]["scaffold_groups"]),
+            "Control valid draws (R² / RMSE / MAE)": " / ".join(
+                str(report["oof_bootstrap"]["metrics"][metric]["valid_draws"])
+                for metric in ("r2", "rmse", "mae")),
+            "Control full-training selection (max_features / leaf)":
+                parameters(report["final_selection"]["selected_parameters"]),
+            "Control distinct outer selections": str(report["selection_stability"]["distinct_selections"]),
+            "Control all outer selections agree": str(report["selection_stability"]["all_outer_folds_agree"]),
+            "Control cumulative fit/predict time (s)":
+                f"{report['timing']['cumulative_fit_predict_seconds']:.2f}",
+            "Control completion invocation wall time (s)":
+                f"{report['timing']['completion_invocation_seconds']:.2f}",
+            "Control report n_jobs": str(report["timing"]["n_jobs"]),
+            "Control search workers": str(report["timing"]["search_workers"]),
+            "Control held-out evaluations": str(report["heldout_evaluations"]),
+        }
+        for fold in report["outer_folds"]:
+            label = f"Control outer fold {fold['outer_fold'] + 1} selection (max_features / leaf)"
+            protocol[split][label] = parameters(fold["selection"]["selected_parameters"])
+        if combined:
+            # Every estimator's own bit length, not just the final fit's choice.
+            selections = [f["selection"] for f in report["outer_folds"]] + [report["final_selection"]]
+            bits = {b for s in selections for c in s["candidates"] for b in c["fold_fpSizes"]}
+            bits.update(f["fpSize"] for f in report["outer_folds"])
+            bits.add(report["final_fpSize"])
+            protocol[split]["Control fit-local bit lengths"] = " / ".join(map(str, sorted(bits)))
+            protocol[split]["Control final-fit Morgan bits"] = str(report["final_fpSize"])
+        protocol[split] = {key.replace("Control", prefix, 1): value
+                           for key, value in protocol[split].items()}
+    for label in protocol["scaffold"]:
+        expected[label] = [protocol[split][label] for split in ("scaffold", "random")]
+    return [(f"Gate 4 {prefix.lower()} table: {label}", rows.get(label) == [values])
+            for label, values in expected.items()]
+
+
 def main() -> int:
     d = json.loads(LOG.read_text())
     s = {x["step"]: x for x in d["steps"]}
@@ -276,6 +392,12 @@ def main() -> int:
     checks.extend((f"handoff {name}", ok)
                   for name, ok in gate3_baseline_checks(signoff, baselines))
     checks.extend(gate3_contrast_checks(signoff, baselines))
+    checks.extend(gate4_control_checks(
+        (ROOT / "DATA_CARD.md").read_text(),
+        load_gate4_controls(ROOT / "results/gate4_training/CHEMBL284")))
+    checks.extend(gate4_combined_checks(
+        (ROOT / "DATA_CARD.md").read_text(),
+        load_gate4_combined(ROOT / "results/gate4_training/CHEMBL284")))
 
     for name, ok in checks:
         print(f"{'OK  ' if ok else 'FAIL'} {name}")

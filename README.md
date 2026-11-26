@@ -11,9 +11,11 @@ baselines under both saved splits. The full train/test table and uncertainty are
 [the Gate 3 handoff](GATE3_SIGNOFF.md),
 [DATA_CARD.md](DATA_CARD.md#gate-3-fixed-baselines) and
 [`results/baselines/CHEMBL284/baselines.md`](results/baselines/CHEMBL284/baselines.md).
-Gate 4 now has a resumable scaffold-grouped nested-CV search and a verified
-training-only command for its tuned descriptor control. No final Gate 4 model or
-combined feature model has been fitted, and no Gate 4 held-out evaluation has run.
+Gate 4 now has a resumable scaffold-grouped nested-CV search and recorded
+training-only searches for its tuned descriptor control under both saved splits.
+The selected descriptor controls have been refitted and saved for both splits.
+Both combined feature searches have partial production fit caches and remain in
+progress. The held-out evaluation is pending.
 
 This project models literature-reported bioactivity measurements. Nothing in it claims or
 implies efficacy, safety or suitability of any compound.
@@ -34,6 +36,10 @@ implies efficacy, safety or suitability of any compound.
 | `src/baselines.py` | fixed training-mean and descriptor-only Random Forest baselines; exact saved splits, train/test metrics and scaffold-group bootstrap test intervals |
 | `src/nested_cv.py` | Gate 4 training-only grouped nested forest search, with incremental fit caches and outer-fold uncertainty |
 | `src/gate4_training.py` | verifies saved inputs and runs the tuned descriptor control on training rows only; no held-out evaluation |
+| `src/gate4_fingerprints.py` | records training-only, fold-local fingerprint bit-length decisions from collision loss; no model fitting |
+| `src/gate4_combined.py` | training-only combined search consuming each fit's own fingerprint decision, with incremental fit caches |
+| `src/gate4_refit.py` | refits the completed training search selection and verifies the saved forest on the same training rows |
+| `src/gate4_model_io.py` | read-only loading of frozen forests, checking their completed search, current inputs, library versions and model checksum |
 | `DATA_CARD.md` | provenance, licence, measured composition and known biases |
 | `data/raw/` | **immutable**: unmodified API responses only, each with `manifest.json` (sha256 per file) |
 | `data/curated/` | derived data (Gate 2 onwards), always regenerated from `data/raw/` by code |
@@ -41,7 +47,7 @@ implies efficacy, safety or suitability of any compound.
 | `results/` | logged outputs: counts, profiles, figures |
 | `notebooks/gate2_dpp4_curation_and_leakage.ipynb` | executed offline visual walkthrough; reruns the production modules from frozen raw data in temporary output directories |
 | `scripts/run_gate2_notebook.py` | executes all notebook cells without a server/kernel listener and saves verified outputs |
-| `scripts/check_data_card_numbers.py` | checks documented curation figures and compares the `GATE2_SIGNOFF.md`, `GATE3_SIGNOFF.md`, Gate 3 feature and baseline tables directly with logged results |
+| `scripts/check_data_card_numbers.py` | checks documented curation figures, Gates 2–3 sign-off tables, Gate 3 features/baselines and Gate 4 training-only controls directly against logged results |
 | `tests/` | offline by default; `-m live` runs the tests that hit the ChEMBL API |
 
 ## Setup and run
@@ -60,6 +66,10 @@ implies efficacy, safety or suitability of any compound.
 .venv/bin/python -m src.features CHEMBL284   # Gate 3 feature cache from the standardised structures
 .venv/bin/python -m src.baselines CHEMBL284  # fixed mean + descriptor RF on both exact saved splits
 .venv/bin/python -m src.gate4_training CHEMBL284 --n-jobs 4  # training-only tuned descriptor control
+.venv/bin/python -m src.gate4_fingerprints CHEMBL284  # training-only fold-local bit-length plans
+.venv/bin/python -m src.gate4_combined CHEMBL284 --n-jobs 4  # resumable training-only combined search
+.venv/bin/python -m src.gate4_combined CHEMBL284 --split scaffold --n-jobs 4  # resume scaffold only
+.venv/bin/python -m src.gate4_combined CHEMBL284 --split random --n-jobs 4  # resume random only
 .venv/bin/python scripts/run_gate2_notebook.py  # execute/save the visual walkthrough offline
 .venv/bin/python scripts/check_data_card_numbers.py  # curation figures and sign-off tables vs logs
 ```
@@ -76,11 +86,60 @@ settings, library versions or search/adapter code abort rather than silently reu
 the cache. A timestamp-only curation rerun retains the same search identity.
 Each search directory's `report.json` wraps its results and checksum; its
 `manifest.json` records data identities, feature specification and fold plans.
-The bit-length decision, combined model, final model persistence and one final
-held-out evaluation remain pending. Scaffold-primary success assessment is
-Claude-and-GPT's working assumption pending Aadit's decision; random results
-will be reported alongside it. The repeat-dispersion reference, code licence and
-final Gates 2 and 3 sign-off also remain Aadit's decisions.
+The recorded descriptor-control searches are under
+[`results/gate4_training/CHEMBL284/`](results/gate4_training/CHEMBL284/).
+Their outer-fold predictions cover only each saved training pool and estimate
+transfer across scaffolds; they are not the final held-out results or a Gate 4
+success-criteria assessment. `tests/test_gate4_training_results.py` checks every
+completed fit against its fold plan, independently recomputes its metrics and
+selections, checks reported uncertainty, and requires a rerun to reuse the caches
+without fitting. Inner selections differ across outer folds; final parameters
+are selected separately using grouped CV on the full saved training pool.
+The [training-only control table](DATA_CARD.md#gate-4-training-only-descriptor-control)
+reports OOF scores and intervals, fold selections, stability and compute timings.
+The numeric documentation guard verifies it against checksummed cache reports;
+mutation tests cover every displayed cell and interval endpoint.
+Fingerprint plans are now recorded alongside the descriptor caches in each split's
+`fingerprint_plan/` directory. The command above supports `--split` and
+`--cache-dir` for the same resume/clean-rebuild workflow. It reuses the descriptor
+search's grouped fold builder and Gate 3's Morgan folding measurements. Each
+estimator's bit length minimises total within-compound identifier loss on its own
+fitting structures, with smaller lengths breaking ties. No label or validation
+structure enters that aggregate decision, including at the inner-fold level.
+The fixed candidate lengths come from Gate 3's folding-sensitivity analysis; this
+is a fidelity criterion within that memory budget, not a predictive-score claim.
+Per-compound evidence, all fit-specific decisions, checksums and timings are logged.
+The combined runner consumes these fit-specific decisions; using the final-fit
+choice throughout CV would violate the intended boundary. The runner verifies the
+plan again before search, checks every decision against that fit's training indices,
+and records the applied bit length in each fit cache. It retains the control's grid,
+selection rule and uncertainty helpers. After a split and feature block have a completed
+search, `.venv/bin/python -m src.gate4_refit CHEMBL284 --split scaffold --block descriptors --n-jobs 4`
+fits the full-training selection and saves the forest and checksum manifest under
+`results/gate4_models/CHEMBL284/<split>/<block>/`. Both descriptor bundles have passed
+reload checks on every training row. For a completed combined search, use `--block combined`.
+Downstream code can use `from src.gate4_model_io import load_model`, then
+`forest, metadata = load_model('CHEMBL284', 'scaffold', 'descriptors')`.
+This verifies current input checksums, search code and library versions, the linked
+completed search report, the binary checksum and the loaded forest's parameters
+and feature count. It returns provenance including the seed, library versions and
+input checksums without fitting, predicting or scoring. Missing or changed artifacts
+raise an error. Keep each model bundle with its corresponding training-search
+`manifest.json` and `report.json`; the loader also requires the verified input
+snapshots. Load only this repository's trusted joblib files.
+Partial production fits are saved in each split's `combined/` directory. The separate
+split commands above were used to advance these searches; interruption preserves
+completed fits. Complete combined OOF summaries, full-training parameter selections
+and the final held-out evaluation remain pending.
+`tests/test_gate4_training_results.py` independently audits every saved combined
+fit's predictions, metrics, scaffold boundaries, fitting-row fingerprint decision,
+input hashes and source identity. Its resume probes use cache snapshots and consume
+cached fits without fitting or featurisation, stopping before the first incomplete fit.
+The combined command
+supports the same split, worker-count and clean-cache options as the control.
+Scaffold-primary is Claude-and-GPT's working assumption pending Aadit's decision;
+the random split is reported alongside it. The assessment split, repeat-dispersion
+reference, code licence and final Gates 2 and 3 sign-off remain Aadit's decisions.
 
 The Gate 2 notebook can also be opened in Jupyter with the repo's `.venv` Python
 kernel and run from top to bottom. Its final cell checks raw immutability, byte-identical

@@ -12,10 +12,33 @@ it. Final human sign-off remains pending. Gate 3 baseline work is separately aut
 in the build-room transcript. Gate 4 is now authorised there and is in progress:
 `src.nested_cv` implements the cached grouped nested search, and
 `src.gate4_training` verifies the saved inputs and exposes only training rows for
-the tuned descriptor control. No final Gate 4 model or held-out result is recorded
-yet. The fingerprint bit-length decision and combined model remain pending.
-Scaffold-primary success assessment is Claude-and-GPT's working assumption,
-pending Aadit's decision, with random-split results to be reported alongside it.
+the tuned descriptor control. Its searches under both saved training pools are
+recorded in `results/gate4_training/CHEMBL284/`, with grouped fold plans,
+per-fit predictions, timings, fold-specific selections and uncertainty. These
+are training-only cross-validation results, not the final held-out evaluation;
+inner selections vary across outer folds. Both selected descriptor controls have been refitted on their respective full
+training pools and saved. The held-out evaluation is pending. Training-only, fold-local fingerprint bit-length plans are now
+recorded by `src.gate4_fingerprints` alongside the control caches. Each fit's
+choice minimises total within-compound identifier loss on that fit's training
+structures, using the pre-existing folding-sensitivity lengths and breaking ties
+in favour of smaller fingerprints. The module reuses Gate 3's folding evidence
+and the descriptor search's grouped fold builder, including inner folds. Labels
+and validation structures do not enter an aggregate choice. This measures
+representation fidelity within a fixed memory budget; it establishes no
+predictive advantage and does not recover stereochemistry or collisions already
+present among unfolded identifiers. `src.gate4_combined` now consumes each fit's
+own plan decision, checks it against the fitting indices and logs the applied
+bit length with every cached fit. It reuses the grouped fold builder, forest
+fitting and uncertainty helpers. Both production combined searches have partial
+fit caches. Complete combined OOF summaries, full-training parameter selections
+and the final combined models remain pending. The real-data audit checks every
+saved fit's predictions, metrics, scaffold boundaries, fitting-row fingerprint
+decision and cache identity. Resume probes use cache snapshots and consume cached
+fits without fitting or featurisation, stopping before the first incomplete fit. The final-fit
+choice is not reused throughout CV.
+Scaffold-primary is Claude-and-GPT's working assumption pending Aadit's decision;
+the random split is reported alongside it. The assessment split, noise reference,
+code licence and final Gates 2 and 3 approvals remain open.
 
 This dataset is literature-reported bioactivity measurements. It does not establish, and this
 project does not claim, the efficacy, safety or suitability of any compound.
@@ -498,3 +521,71 @@ spread truncates the disagreement being estimated, and the labels being predicte
 A defensible irreducible-error threshold would require independent repeat provenance, comparable
 assay conditions, and an uncertainty model for the compound medians. Aadit must approve how Gate 4
 will use these descriptive statistics; the current evidence cannot establish such a threshold.
+
+## Gate 4 training-only descriptor control
+
+These completed searches use only the saved training pools. Reproduce or resume them
+with `.venv/bin/python -m src.gate4_training CHEMBL284 --n-jobs 4`.
+Both nested loops use GroupKFold with the saved Gate 2 exact scaffold labels,
+including inside the random training pool. The OOF estimates therefore describe
+transfer across scaffolds within each training pool; they are not scores on the
+saved test sets and do not assess the Gate 4 success criteria.
+
+| Training pool / model | Training compounds | OOF R² (95% interval) | OOF RMSE (95% interval) | OOF MAE (95% interval) | Outer-fold RMSE SD |
+|---|---:|---:|---:|---:|---:|
+| scaffold / Tuned descriptor control (OOF) | 3,163 | 0.287 [0.230, 0.339] | 1.094 [1.018, 1.166] | 0.826 [0.770, 0.879] | 0.074 |
+| random / Tuned descriptor control (OOF) | 3,172 | 0.290 [0.233, 0.348] | 1.109 [1.041, 1.174] | 0.843 [0.793, 0.895] | 0.084 |
+
+Intervals resample whole scaffold groups, conditional on fixed OOF predictions
+and fold assignments. They exclude selection, refitting and split-seed uncertainty.
+The fold SD describes refitting on overlapping training subsets and is not a
+confidence interval. RMSE and MAE use pIC50 log units; R² is dimensionless.
+No training resubstitution score or held-out score is mixed into this table.
+
+The next table records selections in outer-fold order. Final parameters come from
+a separate grouped search over the full training pool, never from outer scores.
+Selection is unstable across outer folds in both pools; the cached candidate scores
+allow review of how close the alternatives were. Leaf means `min_samples_leaf`.
+
+| Control protocol / result | Scaffold training pool | Random training pool |
+|---|---:|---:|
+| Control outer folds | 5 | 5 |
+| Control inner folds per outer fold | 5 / 5 / 5 / 5 / 5 | 5 / 5 / 5 / 5 / 5 |
+| Control final-selection folds | 5 | 5 |
+| Control grid candidates | 8 | 8 |
+| Control forest trees | 200 | 200 |
+| Control feature columns | 12 | 12 |
+| Control seed | 42 | 42 |
+| Control bootstrap draws | 2000 | 2000 |
+| Control bootstrap scaffold groups | 1096 | 1233 |
+| Control valid draws (R² / RMSE / MAE) | 2000 / 2000 / 2000 | 2000 / 2000 / 2000 |
+| Control outer fold 1 selection (max_features / leaf) | 0.1 / 1 | sqrt / 1 |
+| Control outer fold 2 selection (max_features / leaf) | 0.1 / 1 | sqrt / 1 |
+| Control outer fold 3 selection (max_features / leaf) | 0.1 / 1 | sqrt / 1 |
+| Control outer fold 4 selection (max_features / leaf) | 1.0 / 1 | sqrt / 3 |
+| Control outer fold 5 selection (max_features / leaf) | 0.1 / 1 | sqrt / 1 |
+| Control full-training selection (max_features / leaf) | 0.1 / 1 | 0.1 / 1 |
+| Control distinct outer selections | 2 | 2 |
+| Control all outer selections agree | False | False |
+| Control cumulative fit/predict time (s) | 68.05 | 74.03 |
+| Control completion invocation wall time (s) | 72.28 | 78.17 |
+| Control report n_jobs | 4 | 4 |
+| Control search workers | 1 | 1 |
+| Control held-out evaluations | 0 | 0 |
+
+The full grid, rationale, per-fit predictions, durations and worker counts are in
+[`results/gate4_training/CHEMBL284/`](results/gate4_training/CHEMBL284/). Cumulative
+fit/predict times include cached work; completion invocation time measures the original report-building search, after
+input verification, and may describe a resumed run. Changing worker count
+does not invalidate completed fits. The numeric guard verifies both displayed
+interval endpoints, every selection and the protocol figures against checksummed
+manifests and reports. Cache-audit tests independently recompute scores, selections
+and uncertainty from saved fold predictions and require resumption without fitting.
+
+The combined runner now integrates the recorded fold-local bit-length plans;
+its production searches and single final held-out evaluation remain pending.
+The saved descriptor controls in `results/gate4_models/CHEMBL284/` reproduce
+their pre-serialization predictions on every training row (3,163 scaffold and
+3,172 random). This checks serialization only. The noise reference,
+code licence and final Gates 2 and 3 approvals remain open. These models make no
+claim of efficacy, safety or suitability.
